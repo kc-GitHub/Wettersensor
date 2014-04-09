@@ -4,14 +4,10 @@ const uint8_t devParam[] PROGMEM = {
 	0x05,                                    // The firmware version, 1 byte
 	0x00, 0x3d,                              // The Model ID, 2 byte, model ID, describes HM hardware. We should use high values due to HM starts from 0.
 	'U','W','S','0','0','0','0','0','0','1', // Default The serial ID of the device, 10 bytes, needed for pairing
-//	'T','L','U','0','0','0','1','0','0','2', // The serial ID of the device, 10 bytes, needed for pairing
-//	'D','L','U','0','0','0','1','0','0','2', // The serial ID of the device, 10 bytes, needed for pairing
 	0x70,                                    // Sub Type ID 1 byte, not needed for FHEM, it's something like a group ID
 	0x03, 0x01, 0x00,                        // Device Info, 3 byte, describes device, not completely clear yet. includes amount of channels
 
 	0x6F, 0xB7, 0x5D                         // Default The device HM-Id, 3 byte, very important, must be unique. identifier for the device in the network
-//	0x6F, 0xB7, 0x4D                         // Default The device HM-Id, 3 byte, very important, must be unique. identifier for the device in the network
-//	0x6F, 0xB7, 0x3D                         // Default The device HM-Id, 3 byte, very important, must be unique. identifier for the device in the network
 };
 
 HM::s_devParm dParm = {

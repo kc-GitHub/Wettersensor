@@ -1,7 +1,7 @@
 .settings
 .project
 .cproject
-Release/arduino/*
+arduino
 Release/Libraries
 Release/*.ar
 Release/makefile
