@@ -1,0 +1,12 @@
+.settings
+.project
+.cproject
+arduino
+.Release/*.ar
+.Release/makefile
+.Release/*.mk
+.Release/*.d
+.Release/*.eep
+.Release/*.elf
+.Release/*.d
+.Release/*.o
