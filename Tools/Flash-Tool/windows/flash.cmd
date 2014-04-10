@@ -9,6 +9,16 @@ if %1!==! goto explainUsage & goto end
 if %2!==! goto explainUsage & goto end
 
 ::**************************
+::* convert hexfile to bin *
+::**************************
+bin\hex2bin -c %2 > NUL
+for /f "tokens=1,2 delims=. " %%a in ("%2") do set fileBasename=%%a&set fileExt=%%b
+
+if %3!==! if %4!==! (
+	goto useDefaultValues
+)
+
+::**************************
 ::* Set the default values *
 ::**************************
 set "defHmId1=6F
@@ -51,16 +61,6 @@ set "res="&for /f "delims=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdrefgijklmnopqr
 IF NOT %res%!==! (
 	call :explainUsage "The serial number must contains 10 characters 0-9 or A-Z."
 	goto end
-)
-
-::**************************
-::* convert hexfile to bin *
-::**************************
-bin\hex2bin -c %2 > NUL
-for /f "tokens=1,2 delims=. " %%a in ("%2") do set fileBasename=%%a&set fileExt=%%b
-
-if %3!==! if %4!==! (
-	goto useDefaultValues
 )
 
 
