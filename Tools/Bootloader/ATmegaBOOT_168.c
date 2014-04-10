@@ -283,7 +283,7 @@ int main(void)
 	MCUSR = 0;
 
 	WDTCSR |= _BV(WDCE) | _BV(WDE);
-	WDTCSR = 0;
+//	WDTCSR = 0;
 
 	// Check if the WDT was used to reset, in which case we dont bootload and skip straight to the code. woot.
 	if (! (ch &  _BV(EXTRF))) // if its a not an external reset...
