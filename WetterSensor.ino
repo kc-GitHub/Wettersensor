@@ -54,8 +54,6 @@ uint16_t ledCount;
 void setup() {
 
 	// We disable the Watchdog first
-	MCUSR = 0;
-	wdt_disable();
 
 	#ifdef SER_DBG
 	Serial.begin(57600);																// serial setup
@@ -68,8 +66,6 @@ void setup() {
 
 	hm.statusLed.config(4, 4);													// configure the status led pin
 	hm.statusLed.set(STATUSLED_BOTH, STATUSLED_MODE_BLINKFAST, 3);
-
-//	hm.battery.config(BATTERY_MODE_BANDGAP_MESSUREMENT, 0, 0, 0, 10000);		// internal battery meassurement
 
 	// setup battery measurement
 	hm.battery.config(
@@ -122,7 +118,9 @@ void HM_Status_Request(uint8_t *data, uint8_t len) {
 void HM_Reset_Cmd(uint8_t *data, uint8_t len) {
 	//	Serial << F("reset, data: ") << pHex(data,len) << '\n';
 	hm.send_ACK();																// send an ACK
-	if (data[0] == 0) hm.reset();												// do a reset only if channel is 0
+	if (data[0] == 0) {
+		hm.reset();																// do a reset only if channel is 0
+	}
 }
 
 void HM_Config_Changed(uint8_t *data, uint8_t len) {
