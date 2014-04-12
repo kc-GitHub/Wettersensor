@@ -608,7 +608,7 @@ double  TSL2561::readBrightness(unsigned int &data0, unsigned int &data1) {
 //_delay_ms(1000);
 
 	boolean luxValid = getLux(data0, data1, lux);
-	lux = (luxValid) ? lux : 200000;
+	lux = (luxValid) ? lux : 100000;
 
 	setPowerDown();
 
