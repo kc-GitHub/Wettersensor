@@ -1,7 +1,7 @@
 #include <AskSinMain.h>
 
 const uint8_t devParam[] PROGMEM = {
-	0x06,                                    // The firmware version, 1 byte
+	0x07,                                    // The firmware version, 1 byte
 	0xF1, 0x01,                              // The model-ID    0xF1 0x01 = DIY (UWS-THPL)
 	'U','W','S','0','0','0','0','0','0','1', // Default The serial ID of the device, 10 bytes, needed for pairing
 	0x70,                                    // Sub Type ID 1 byte, not needed for FHEM, it's something like a group ID
