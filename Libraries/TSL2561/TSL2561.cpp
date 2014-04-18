@@ -587,28 +587,38 @@ double  TSL2561::readBrightness(unsigned int &data0, unsigned int &data1) {
 	_delay_ms(50);
 	getData(data0, data1);
 
-//	Serial.print("1: data0 :"); Serial.print(data0); Serial.print(", data1 :"); Serial.println(data1);
+	#ifdef SER_DBG
+		Serial.print("1: data0 :"); Serial.print(data0); Serial.print(", data1 :"); Serial.println(data1);
+	#endif
 
 	if ((data0 < 1000) && (data1 < 1000)) {
 		boolean gain = ((data0 < 100) && (data1 < 100)) ? true : false;
 		setTiming(gain, INTEGATION_TIME_402);
 		_delay_ms(450);
 		getData(data0, data1);
-//		Serial.println("INTEGATION_TIME_402");
-//		Serial.print("2: data0 :"); Serial.print(data0); Serial.print(", data1 :"); Serial.print(data1); Serial.print(", gain :"); Serial.println(gain);
+
+		#ifdef SER_DBG
+			Serial.print("402: data0 :"); Serial.print(data0); Serial.print(", data1 :"); Serial.print(data1); Serial.print(", gain :"); Serial.println(gain);
+		#endif
 
 	} else if ((data0) < 2000 && (data1 < 2000)) {
 		setTiming(false, INTEGATION_TIME_101);
 		_delay_ms(150);
 		getData(data0, data1);
-//		Serial.println("INTEGATION_TIME_101");
-//		Serial.print("2: data0 :"); Serial.print(data0); Serial.print(", data1 :"); Serial.println(data1);
+
+		#ifdef SER_DBG
+			Serial.print("101: data0 :"); Serial.print(data0); Serial.print(", data1 :"); Serial.println(data1);
+		#endif
 	}
 
-//_delay_ms(1000);
-
 	boolean luxValid = getLux(data0, data1, lux);
-	lux = (luxValid) ? lux : 100000;
+
+	#ifdef SER_DBG
+		Serial.print ("luxValid: "); Serial.println(luxValid); Serial.print (", lux: "); Serial.println(lux);
+		 _delay_ms(10);
+	#endif
+
+	lux = (luxValid) ? lux : 65537;
 
 	setPowerDown();
 

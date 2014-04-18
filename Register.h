@@ -1,13 +1,14 @@
 #include <AskSinMain.h>
 
 const uint8_t devParam[] PROGMEM = {
-	0x07,                                    // The firmware version, 1 byte
-	0xF1, 0x01,                              // The model-ID    0xF1 0x01 = DIY (UWS-THPL)
-	'U','W','S','0','0','0','0','0','0','1', // Default The serial ID of the device, 10 bytes, needed for pairing
+	0x08,                                    // The firmware version, 1 byte
+	0xF1, 0x01,                              // The model-ID    0xF1 0x01 = DIY (HB-UW-Sen-THPL-I)
+//	0xF1, 0x02,                              // The model-ID    0xF1 0x01 = DIY (HB-UW-Sen-THPL-O)
+	'H','B','0','D','e','f','a','u','l','t', // The serial 10 bytes, needed for pairing   (Default for flash tool)
 	0x70,                                    // Sub Type ID 1 byte, not needed for FHEM, it's something like a group ID
 	0x03, 0x01, 0x00,                        // Device Info, 3 byte, describes device, not completely clear yet. includes amount of channels
 
-	0x6F, 0xB7, 0x5D                         // Default The device HM-Id, 3 byte, very important, must be unique. identifier for the device in the network
+	0xAB, 0xCD, 0xEF                         // The HM-ID 3 bytes, needed for pairing     (Default for flash tool)
 };
 
 HM::s_devParm dParm = {

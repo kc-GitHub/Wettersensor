@@ -4,10 +4,12 @@ use strict;
 use warnings;
 
 # device definition
-$HMConfig::culHmModel{'F101'}             = {name => 'UWS-THPL',   st   => 'THPLSensor',   cyc  => '00:10',   rxt  => 'c:f',   lst  => 'p',   chn  => '',};
+$HMConfig::culHmModel{'F101'}             = {name => 'HB-UW-Sen-THPL-I',   st   => 'THPLSensor',   cyc  => '00:10',   rxt  => 'c:f',   lst  => 'p',   chn  => '',};
+$HMConfig::culHmModel{'F102'}             = $HMConfig::culHmModel{'F101'};
 
 # Register model mapping
-$HMConfig::culHmRegModel{'UWS-THPL'}      = {burstRx =>1};
+$HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'}      = {burstRx =>1};
+$HMConfig::culHmRegModel{'HB-UW-Sen-THPL-O'}      = $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'};
 
 # subtype channel mapping
 $HMConfig::culHmSubTypeSets{'THPLSensor'} = {peerChan => '0 <actChn> ... single [set|unset] [actor|remote|both]'};
@@ -52,7 +54,7 @@ sub CUL_HM_ParseTHPLSensor(@){
 		}
 		
 		# luminosity
-		if ($lux < 100001) {
+		if ($lux < 65538) {
 			$stateMsg .= ' Lux: ' . $lux;
 			push (@events, [$shash, 1, 'lux:'        . $lux]);
 		}
