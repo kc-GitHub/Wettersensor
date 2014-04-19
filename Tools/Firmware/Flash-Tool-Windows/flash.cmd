@@ -21,10 +21,10 @@ if %3!==! if %4!==! (
 ::**************************
 ::* Set the default values *
 ::**************************
-set "defHmId1=6F
-set "defHmId2=B7
-set "defHmId3=5D
-set "defSerialNumber=UWS0000001"
+set "defHmId1=AB
+set "defHmId2=CD
+set "defHmId3=EF
+set "defSerialNumber=HB0Default"
 
 echo.
 

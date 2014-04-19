@@ -48,8 +48,6 @@ TSL2561 tsl2561;
 
 Sensors_SHT10_BMP085_TSL2561 sensTHPL;
 
-uint16_t ledCount;
-
 // main functions
 void setup() {
 
@@ -93,21 +91,6 @@ void loop() {
 	parser.poll();																		// handle serial input from console
 #endif
 	hm.poll();																	// poll the HM communication
-
-/*
-	// debug led blinking, disabled led.poll before
-	ledCount++;
-	if (ledCount == 5000) {
-		digitalWrite(4, 1);
-		hm.stayAwake(50);
-
-//		hm.statusLed.on(STATUSLED_BOTH);
-	} else if (ledCount == 5100) {
-		digitalWrite(4, 0);
-		ledCount = 0;
-//		hm.statusLed.off(STATUSLED_BOTH);
-	}
-*/
 }
 
 //- HM functions ----------------------------------------------------------------------------------------------------------
@@ -116,7 +99,7 @@ void HM_Status_Request(uint8_t *data, uint8_t len) {
 }
 
 void HM_Reset_Cmd(uint8_t *data, uint8_t len) {
-	//	Serial << F("reset, data: ") << pHex(data,len) << '\n';
+		Serial << F("reset, data: ") << pHex(data,len) << '\n';
 	hm.send_ACK();																// send an ACK
 	if (data[0] == 0) {
 		hm.reset();																// do a reset only if channel is 0
