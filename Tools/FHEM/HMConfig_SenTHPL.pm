@@ -27,7 +27,7 @@ sub CUL_HM_ParseTHPLSensor(@){
 		my $name = $shash->{NAME};
 		my $chn = '01';
 
-		my ($dTempBat, $hum, $pressure, $lux, $batVoltage) = map{hex($_)} unpack ('A4A2A4A8A4A8A8', $msgData);
+		my ($dTempBat, $hum, $pressure, $luminosity, $batVoltage) = map{hex($_)} unpack ('A4A2A4A8A4A8A8', $msgData);
 
 		my $temperature =  $dTempBat & 0x7fff;
 		$temperature = ($temperature &0x4000) ? $temperature - 0x8000 : $temperature; 
@@ -37,8 +37,8 @@ sub CUL_HM_ParseTHPLSensor(@){
 		push (@events, [$shash, 1, 'temperature:' . $temperature]);
 		push (@events, [$shash, 1, 'battery:' . ($dTempBat & 0x8000 ? 'low' : 'ok')]);
 
-		$lux = ($lux + 0.0) / 100;
-		$lux = ($lux < 100) ? $lux : sprintf('%.0f', $lux);
+		$luminosity = ($luminosity + 0.0) / 100;
+		$luminosity = ($luminosity < 100) ? $luminosity : sprintf('%.0f', $luminosity);
 		$batVoltage = sprintf('%.2f', (($batVoltage + 0.00) / 1000));
 
 		if ($modules{CUL_HM}{defptr}{$src.$chn}){
@@ -50,13 +50,13 @@ sub CUL_HM_ParseTHPLSensor(@){
 		# humidity
 		if ($hum)                 {
 			$stateMsg .= ' H: ' . $hum;
-			push (@events, [$shash, 1, 'humidity:'   . $hum]);
+			push (@events, [$shash, 1, 'humidity:' . $hum]);
 		}
 		
 		# luminosity
-		if ($lux < 65538) {
-			$stateMsg .= ' Lux: ' . $lux;
-			push (@events, [$shash, 1, 'lux:'        . $lux]);
+		if ($luminosity < 65538) {
+			$stateMsg .= ' L: ' . $luminosity;
+			push (@events, [$shash, 1, 'luminosity:' . $luminosity]);
 		}
 
 		# air pressure
