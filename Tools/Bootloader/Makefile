@@ -68,7 +68,7 @@ OBJDUMP        = avr-objdump
 all:
 
 lilypad: TARGET = lilypad
-lilypad: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>1' '-DNUM_LED_FLASHES=3'
+lilypad: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>1' '-DNUM_LED_FLASHES=3' '-DWATCHDOG_MODS'
 lilypad: AVR_FREQ = 8000000L
 lilypad: $(PROGRAM)_lilypad.hex
 
@@ -140,7 +140,7 @@ diecimila_isp: EFUSE = 00
 diecimila_isp: isp
 
 ng: TARGET = ng
-ng: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>1' '-DNUM_LED_FLASHES=3'
+ng: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>1' '-DNUM_LED_FLASHES=3' '-DWATCHDOG_MODS'
 ng: AVR_FREQ = 16000000L
 ng: $(PROGRAM)_ng.hex
 
@@ -153,7 +153,7 @@ ng_isp: isp
 
 atmega328: TARGET = atmega328
 atmega328: MCU_TARGET = atmega328p
-atmega328: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=1' -DBAUD_RATE=57600
+atmega328: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=3' -DBAUD_RATE=57600 '-DWATCHDOG_MODS'
 atmega328: AVR_FREQ = 16000000L 
 atmega328: LDSECTION  = --section-start=.text=0x7800
 atmega328: $(PROGRAM)_atmega328.hex
@@ -168,7 +168,7 @@ atmega328_isp: isp
 
 atmega328_pro8: TARGET = atmega328_pro_8MHz
 atmega328_pro8: MCU_TARGET = atmega328p
-atmega328_pro8: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=2' -DBAUD_RATE=57600 -DDOUBLE_SPEED
+atmega328_pro8: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=3' -DBAUD_RATE=57600 -DDOUBLE_SPEED '-DWATCHDOG_MODS'
 atmega328_pro8: AVR_FREQ = 8000000L 
 atmega328_pro8: LDSECTION  = --section-start=.text=0x7800
 atmega328_pro8: $(PROGRAM)_atmega328_pro_8MHz.hex

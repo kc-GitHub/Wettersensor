@@ -283,7 +283,7 @@ int main(void)
 	MCUSR = 0;
 
 	WDTCSR |= _BV(WDCE) | _BV(WDE);
-//	WDTCSR = 0;
+	WDTCSR = 0;
 
 	// Check if the WDT was used to reset, in which case we dont bootload and skip straight to the code. woot.
 	if (! (ch &  _BV(EXTRF))) // if its a not an external reset...
@@ -603,7 +603,7 @@ int main(void)
 				/* if ((length.byte[0] & 0x01) == 0x01) length.word++;	//Even up an odd number of bytes */
 				if ((length.byte[0] & 0x01)) length.word++;	//Even up an odd number of bytes
 				cli();					//Disable interrupts, just to be sure
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega1281__)
+#if defined(EEPE)
 				while(bit_is_set(EECR,EEPE));			//Wait for previous EEPROM writes to complete
 #else
 				while(bit_is_set(EECR,EEWE));			//Wait for previous EEPROM writes to complete
@@ -779,6 +779,7 @@ int main(void)
 	else if(ch=='v') {
 		byte_response(0x00);
 	}
+
 
 #if defined MONITOR 
 

@@ -10,3 +10,6 @@ set OLDPATH=%PATH%
 %DIRAVRUTIL%\make.exe ng
 %DIRAVRUTIL%\make.exe atmega328
 @path %OLDPATH%
+
+# Compile with:
+make atmega328_pro8

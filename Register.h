@@ -5,7 +5,7 @@ const uint8_t devParam[] PROGMEM = {
 	0xF1, 0x01,                              // The model-ID    0xF1 0x01 = DIY (HB-UW-Sen-THPL-I)
 //	0xF1, 0x02,                              // The model-ID    0xF1 0x01 = DIY (HB-UW-Sen-THPL-O)
 	'H','B','0','D','e','f','a','u','l','t', // The serial 10 bytes, needed for pairing   (Default for flash tool)
-	0x70,                                    // Sub Type ID 1 byte, not needed for FHEM, it's something like a group ID
+	0x70,                                    // Frame type 0x70 = WEATHER_EVENT
 	0x03, 0x01, 0x00,                        // Device Info, 3 byte, describes device, not completely clear yet. includes amount of channels
 
 	0xAB, 0xCD, 0xEF                         // The HM-ID 3 bytes, needed for pairing     (Default for flash tool)
