@@ -20,7 +20,7 @@ fi
 device="HB-UW-Sen-THPL"
 
 ### Copy new devices Files ###
-cp -ar ./firmware/rftypes/* $mountPath/firmware/rftypes/
+cp -a ./firmware/rftypes/* $mountPath/firmware/rftypes/
 
 ### Copy new images ###
 cp -ar ./www/config/img/devices $mountPath/www/config/img/
