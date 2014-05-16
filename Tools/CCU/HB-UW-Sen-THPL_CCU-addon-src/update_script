@@ -1,0 +1,78 @@
+#!/bin/sh
+
+### Prepare filesystem
+mountPath="/mnt-root"
+mkdir -p $mountPath
+
+if [ "$1" == "" ]; then
+	echo "CCU1"
+	mount -t yaffs /dev/mtdblock2 $mountPath
+	lcdtool "Installing new device"
+	lcdtool -a 0x40 -t bin 00
+else
+	echo "CCU2"
+	mount -t ubifs ubi0:root $mountPath
+fi
+
+###########################
+### New device UWS-THPL ###
+###########################
+device="HB-UW-Sen-THPL"
+
+### Copy new devices Files ###
+cp -ar ./firmware/rftypes $mountPath/firmware/rftypes/
+
+### Copy new images ###
+cp -ar ./www/config/img/devices $mountPath/www/config/img/
+
+### Edit DEVDB.tcl ###
+devdescrFile="$mountPath/www/config/devdescr/DEVDB.tcl"
+devdescrSearch="set[[:space:]]*DEV_LIST[[:space:]]*{"
+
+devdescrInsert=""
+devdescrInsert="$devdescrInsert HB-UW-Sen-THPL-I {{50 \/config\/img\/devices\/50\/hb-uw-sen-thpl-i_thumb.png} {250 \/config\/img\/devices\/250\/hb-uw-sen-thpl-i.png}} "
+devdescrInsert="$devdescrInsert HB-UW-Sen-THPL-O {{50 \/config\/img\/devices\/50\/hb-uw-sen-thpl-o_thumb.png} {250 \/config\/img\/devices\/250\/hb-uw-sen-thpl-o.png}} "
+
+devdescrModifyed=`cat $devdescrFile | grep "$device"`
+if [ -z $devdescrModifyed ]; then
+	cp -a $devdescrFile $devdescrFile.save
+	sed -i "s/\($devdescrSearch\)/\1$devdescrInsert/g" $devdescrFile
+fi
+
+### Edit webui.js ###
+webuiFile="$mountPath/www/webui/webui.js"
+webuiSearch="DEV_HIGHLIGHT[[:space:]]*=[[:space:]]*new Array();"
+
+webuiInsert="\n"
+webuiInsert="$webuiInsert DEV_HIGHLIGHT['HB-UW-Sen-THPL-I'] = new Object();\n"
+webuiInsert="$webuiInsert DEV_LIST.push('HB-UW-Sen-THPL-I');\n"
+webuiInsert="$webuiInsert DEV_DESCRIPTION['HB-UW-Sen-THPL-I']='Univesal Funk- Temperatur-\/ Feuchte-\/ Luftdruck-\/ Helligkeitssensor (Innen)';\n"
+webuiInsert="$webuiInsert DEV_PATHS['HB-UW-Sen-THPL-I'] = new Object();\n"
+webuiInsert="$webuiInsert DEV_PATHS['HB-UW-Sen-THPL-I']['50'] = '\/config\/img\/devices\/50\/hb-uw-sen-thpl-i_thumb.png';\n"
+webuiInsert="$webuiInsert DEV_PATHS['HB-UW-Sen-THPL-I']['250'] = '\/config\/img\/devices\/250\/hb-uw-sen-thpl-i.png';\n"
+
+webuiInsert="$webuiInsert DEV_HIGHLIGHT['HB-UW-Sen-THPL-O'] = new Object();\n"
+webuiInsert="$webuiInsert DEV_LIST.push('HB-UW-Sen-THPL-O');\n"
+webuiInsert="$webuiInsert DEV_DESCRIPTION['HB-UW-Sen-THPL-O']='Univesal Funk- Temperatur-\/ Feuchte-\/ Luftdruck-\/ Helligkeitssensor (Außen)';\n"
+webuiInsert="$webuiInsert DEV_PATHS['HB-UW-Sen-THPL-O'] = new Object();\n"
+webuiInsert="$webuiInsert DEV_PATHS['HB-UW-Sen-THPL-O']['50'] = '\/config\/img\/devices\/50\/hb-uw-sen-thpl-o_thumb.png';\n"
+webuiInsert="$webuiInsert DEV_PATHS['HB-UW-Sen-THPL-O']['250'] = '\/config\/img\/devices\/250\/hb-uw-sen-thpl-o.png';\n"
+
+webuiModifyed=`cat $webuiFile | grep "$device"`
+if [ -z $webuiModifyed ]; then
+	cp -a $webuiFile $webuiFile.save
+	sed -i "s/\($webuiSearch\)/\1$webuiInsert/g" $webuiFile
+fi
+
+umount $mountPath
+if [ "$1" == "" ]; then
+	echo "CCU1"
+	lcdtool "Reboot...             "
+	lcdtool -a 0x40 -t bin 00
+	echo "x" > /dev/watchdog
+	reboot
+	while true ; do true ;  done
+else
+	echo "CCU2"
+	# CCU2 always reboot after Addon/Firmware Update
+fi
