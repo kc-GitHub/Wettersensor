@@ -4,7 +4,7 @@
 mountPath="/mnt-root"
 mkdir -p $mountPath
 
-if [ "$1" == "" ]; then
+if ["$1" == ""]; then
 	echo "CCU1"
 	mount -t yaffs /dev/mtdblock2 $mountPath
 	lcdtool "Installing new device"
@@ -27,7 +27,7 @@ cp -ar ./www/config/img/devices $mountPath/www/config/img/
 
 ### Edit DEVDB.tcl ###
 devdescrFile="$mountPath/www/config/devdescr/DEVDB.tcl"
-devdescrSearch="set[[:space:]]*DEV_LIST[[:space:]]*{"
+devdescrSearch="array[[:space:]]*set[[:space:]]*DEV_PATHS[[:space:]]*{"
 
 devdescrInsert=""
 devdescrInsert="$devdescrInsert HB-UW-Sen-THPL-I {{50 \/config\/img\/devices\/50\/hb-uw-sen-thpl-i_thumb.png} {250 \/config\/img\/devices\/250\/hb-uw-sen-thpl-i.png}} "
@@ -65,7 +65,7 @@ if [ -z $webuiModifyed ]; then
 fi
 
 umount $mountPath
-if [ "$1" == "" ]; then
+if ["$1" == ""]; then
 	echo "CCU1"
 	lcdtool "Reboot...             "
 	lcdtool -a 0x40 -t bin 00
