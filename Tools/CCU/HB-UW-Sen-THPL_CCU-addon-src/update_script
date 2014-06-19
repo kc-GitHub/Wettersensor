@@ -4,7 +4,7 @@
 mountPath="/mnt-root"
 mkdir -p $mountPath
 
-if ["$1" == ""]; then
+if [ "$1" == "" ]; then
 	echo "CCU1"
 	mount -t yaffs /dev/mtdblock2 $mountPath
 	lcdtool "Installing new device"
@@ -65,7 +65,7 @@ if [ -z $webuiModifyed ]; then
 fi
 
 umount $mountPath
-if ["$1" == ""]; then
+if [ "$1" == "" ]; then
 	echo "CCU1"
 	lcdtool "Reboot...             "
 	lcdtool -a 0x40 -t bin 00
