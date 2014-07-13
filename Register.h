@@ -1,7 +1,7 @@
 #include <AskSinMain.h>
 
 const uint8_t devParam[] PROGMEM = {
-	0x08,                                    // The firmware version, 1 byte
+	0x10,                                    // The firmware version, 1 byte
 	0xF1, 0x01,                              // The model-ID    0xF1 0x01 = DIY (HB-UW-Sen-THPL-I)
 //	0xF1, 0x02,                              // The model-ID    0xF1 0x01 = DIY (HB-UW-Sen-THPL-O)
 	'H','B','0','D','e','f','a','u','l','t', // The serial 10 bytes, needed for pairing   (Default for flash tool)
@@ -12,7 +12,7 @@ const uint8_t devParam[] PROGMEM = {
 };
 
 HM::s_devParm dParm = {
-	1,                                       // send retries, 1 byte, how often a string should be send out until we get an answer
+	5,                                       // send retries, 1 byte, how often a string should be send out until we get an answer
 	700,                                     // send timeout, 2 byte, time out for ACK handling
 	devParam                                 // pointer to devParam, see above
 };
