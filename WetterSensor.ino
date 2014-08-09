@@ -1,5 +1,3 @@
-//#define SER_DBG
-
 //- load library's --------------------------------------------------------------------------------------------------------
 #include "WetterSensor.h"
 #include "Register.h"															// configuration sheet
@@ -52,13 +50,24 @@ Sensors_SHT10_BMP085_TSL2561 sensTHPL;
 void setup() {
 
 	// We disable the Watchdog first
+	wdt_disable();
 
 	#ifdef SER_DBG
-	Serial.begin(57600);																// serial setup
-	Serial << F("Starting sketch...\n");												// ...and some information
-	Serial << pCharPGM(helptext1) << '\n';
-	Serial << F("freeMem: ") << freeMem() << F(" byte") <<'\n';
-#endif	
+		Serial.begin(57600);													// serial setup
+		Serial << F("Starting sketch...\n");									// ...and some information
+		Serial << pCharPGM(helptext1) << '\n';
+		Serial << F("freeMem: ") << freeMem() << F(" byte") <<'\n';
+	#endif
+
+	#if USE_ADRESS_SECTION == 1
+		getDataFromAddressSection(devParam, 1,  ADDRESS_SECTION_START + 0, 12);	// get device type (model-ID) and serial number from bootloader section at 0x7FF0 and 0x7FF2
+		getDataFromAddressSection(devParam, 17, ADDRESS_SECTION_START + 12, 3);	// get device address stored in bootloader section at 0x7FFC
+
+//		Serial.begin(57600);
+//		Serial << F("Device type from Bootloader: ") << pHex(&devParam[1],  2) << '\n';
+//		Serial << F("Serial from Bootloader: ")      << pHex(&devParam[3], 10) << '\n';
+//		Serial << F("Addresse from Bootloader: ")    << pHex(&devParam[17], 3) << '\n';
+	#endif
 
 	hm.cc.config(10,11,12,13,2,0);												// CS, MOSI, MISO, SCK, GDO0, Interrupt
 
@@ -69,6 +78,10 @@ void setup() {
 	hm.battery.config(
 		BATTERY_MODE_EXTERNAL_MESSUREMENT, 7, 1, BATTERY_MEASSUREMENT_FACTOR, 10000
 	);
+
+//	char batLowTreshold[1];
+//	memcpy_P(batLowTreshold, &dParm.p[20], 1);
+//	hm.battery.setMinVoltage((int)batLowTreshold);
 	hm.battery.setMinVoltage(BATTERY_MIN_VOLTAGE);
 
 	hm.setPowerMode(3);															// power mode for HM device
@@ -82,13 +95,23 @@ void setup() {
 
 	byte rr = MCUSR;
 	MCUSR =0;
+}
 
-	sensTHPL.setResetReason(rr);
+void getDataFromAddressSection(uint8_t *buffer, uint8_t bufferStartAddress, uint16_t sectionAddress, uint8_t dataLen) {
+	for (unsigned char i = 0; i < dataLen; i++) {
+		buffer[(i + bufferStartAddress)] = pgm_read_byte(sectionAddress + i);
+	}
+}
+
+void getPgmSpaceData(uint8_t *buffer, uint16_t address, uint8_t len) {
+	for (unsigned char i = 0; i < len; i++) {
+		buffer[i] = pgm_read_byte(address+i);
+	}
 }
 
 void loop() {
 #ifdef SER_DBG
-	parser.poll();																		// handle serial input from console
+	parser.poll();																// handle serial input from console
 #endif
 	hm.poll();																	// poll the HM communication
 }
@@ -116,32 +139,38 @@ void HM_Remote_Event(uint8_t *data, uint8_t len) {
 
 // config functions
 #ifdef SER_DBG
-void sendPairing() {																	// send the first pairing request
+
+/**
+ * send the first pairing request
+ */
+void sendPairing() {
 	hm.startPairing();
 }
+
 void resetDevice() {
 	Serial << F("reset device, clear eeprom...\n");
 	hm.reset();
 	Serial << F("reset done\n");
 }
-void sendCmdStr() {																		// reads a sndStr from console and put it in the send queue
-	memcpy(hm.send.data,parser.buffer,parser.count());									// take over the parsed byte data
-	Serial << F("s: ") << pHexL(hm.send.data, hm.send.data[0]+1) << '\n';				// some debug string
-	hm.send_out();																		// fire to send routine
+
+/**
+ * Read a sndStr from console and put it in the send queue
+ */
+void sendCmdStr() {
+	memcpy(hm.send.data,parser.buffer,parser.count());							// take over the parsed byte data
+	Serial << F("s: ") << pHexL(hm.send.data, hm.send.data[0]+1) << '\n';
+	hm.send_out();																// fire to send routine
 }
+
 void buttonSend() {
 	uint8_t cnl, lpr;
 	parser >> cnl >> lpr;
 	
-	Serial << "button press, cnl: " << cnl << ", long press: " << lpr << '\n';			// some debug message
-	hm.sendPeerREMOTE(cnl,lpr,0);														// parameter: button/channel, long press, battery
+	Serial << "button press, cnl: " << cnl << ", long press: " << lpr << '\n';
+	hm.sendPeerREMOTE(cnl, lpr, 0);												// parameter: button/channel, long press, battery
 }
+
 void printConfig() {
 	hm.printConfig();
 }
 #endif
-
-
-
-
-

@@ -1,20 +1,33 @@
 #include <AskSinMain.h>
 
-const uint8_t devParam[] PROGMEM = {
-	0x10,                                    // The firmware version, 1 byte
-	0xF1, 0x01,                              // The model-ID    0xF1 0x01 = DIY (HB-UW-Sen-THPL-I)
-//	0xF1, 0x02,                              // The model-ID    0xF1 0x01 = DIY (HB-UW-Sen-THPL-O)
-	'H','B','0','D','e','f','a','u','l','t', // The serial 10 bytes, needed for pairing   (Default for flash tool)
-	0x70,                                    // Frame type 0x70 = WEATHER_EVENT
-	0x03, 0x01, 0x00,                        // Device Info, 3 byte, describes device, not completely clear yet. includes amount of channels
+#define FRAME_TYPE           0x70										// Frame type 0x70 = WEATHER_EVENT
+#define DEVICE_INFO          0x03, 0x01, 0x00							// Device Info, 3 byte, describes device, not completely clear yet. includes amount of channels
 
-	0xAB, 0xCD, 0xEF                         // The HM-ID 3 bytes, needed for pairing     (Default for flash tool)
-};
+
+#if USE_ADRESS_SECTION == 1
+	uint8_t devParam[] = {
+		FIRMWARE_VERSION,
+		0xFF, 0xFF,														// space for device type, assigned later
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,		// space for device serial, assigned later
+		FRAME_TYPE,
+		DEVICE_INFO,
+		0xFF, 0xFF, 0xFF												// space for device address, assigned later
+	};
+#else
+	const uint8_t devParam[] PROGMEM = {
+		FIRMWARE_VERSION,
+		DEVICE_TYPE,
+		DEVICE_SERIAL,
+		FRAME_TYPE,
+		DEVICE_INFO,
+		DEVICE_ADDRESS
+	};
+#endif
 
 HM::s_devParm dParm = {
-	5,                                       // send retries, 1 byte, how often a string should be send out until we get an answer
-	700,                                     // send timeout, 2 byte, time out for ACK handling
-	devParam                                 // pointer to devParam, see above
+	5,																	// send retries, 1 byte, how often a string should be send out until we get an answer
+	700,																// send timeout, 2 byte, time out for ACK handling
+	devParam															// pointer to devParam, see above
 };
 
 HM::s_modtable modTbl[] = {
