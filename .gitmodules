@@ -4,3 +4,6 @@
 [submodule "Libraries/AskSin"]
 	path = Libraries/AskSin
 	url = git://github.com/kc-GitHub/AskSin.git
+[submodule "Tools/Bootloader/AskSin_OTA"]
+	path = Tools/Bootloader/AskSin_OTA
+	url = git@github.com:kc-GitHub/Asksin_OTA_Bootloader.git
