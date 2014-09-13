@@ -45,7 +45,8 @@ const bool ACK    = true;
 
 // Temperature & humidity equation constants
 //  const float D1  = -40.1;          // for deg C @ 5V
-  const float D1  = -39.6;          // for deg C @ 3V
+  const float D1  = -39.7;          // for deg C @ 3.5V
+//  const float D1  = -39.6;          // for deg C @ 3V
   const float D2h =   0.01;         // for deg C, 14-bit precision
   const float D2l =   0.04;         // for deg C, 12-bit precision
 
