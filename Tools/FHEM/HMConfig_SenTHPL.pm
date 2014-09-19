@@ -61,11 +61,12 @@ sub CUL_HM_ParseTHPLSensor(@){
 
 		# air pressure
 		if ($pressure) {
+			$pressure = $pressure / 10;
 			$stateMsg .= ' P: '    . $pressure;
 			push (@events, [$shash, 1, 'pressure:'    . $pressure]);
 
 			my $altitude = AttrVal('global', 'altitude', 0);
-			my $pressureNN = $altitude ? sprintf('%.0f', ($pressure + ($altitude / 8.5))) : 0;
+			my $pressureNN = $altitude ? sprintf('%.1f', ($pressure + ($altitude / 8.5))) : 0;
 			if ($pressureNN) {
 				$stateMsg .= ' P-NN: ' . $pressureNN;
 				push (@events, [$shash, 1, 'pressure-nn:' . $pressureNN]);

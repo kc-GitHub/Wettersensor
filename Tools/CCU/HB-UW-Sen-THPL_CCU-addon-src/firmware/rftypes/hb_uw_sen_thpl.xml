@@ -78,6 +78,7 @@
           <physical type="integer" interface="command" value_id="AIR_PRESSURE">
             <event frame="WEATHER_EVENT" />
           </physical>
+          <conversion type="float_integer_scale" factor="10.0" />
           <description>
             <field id="AutoConfRoles" value="WEATHER" />
           </description>
