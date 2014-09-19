@@ -355,6 +355,7 @@ boolean TSL2561::readByte(unsigned char address, unsigned char &value) {
  */
 boolean TSL2561::writeByte(unsigned char address, unsigned char value) {
 	// Set up command byte for write
+
 	Wire.beginTransmission(_i2c_address);
 	Wire.write((address & 0x0F) | TSL2561_CMD);
 	// Write byte
