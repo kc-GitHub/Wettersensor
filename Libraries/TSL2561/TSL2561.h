@@ -17,26 +17,49 @@
 
 #include "Arduino.h"
 
-#define INTEGATION_TIME_14     0
-#define INTEGATION_TIME_101    1
-#define INTEGATION_TIME_402    2
-#define INTEGATION_TIME_MANUAL 3
+#define INTEGATION_TIME_14                         0
+#define INTEGATION_TIME_101                        1
+#define INTEGATION_TIME_402                        2
+#define INTEGATION_TIME_MANUAL                     3
 
-#define TSL2561_ADDR_0         0x29 // address with '0' shorted on board
-#define TSL2561_ADDR           0x39 // default address
-#define TSL2561_ADDR_1         0x49 // address with '1' shorted on board
+#define TSL2561_ADDR_0                             0x29 // address with '0' shorted on board
+#define TSL2561_ADDR                               0x39 // default address
+#define TSL2561_ADDR_1                             0x49 // address with '1' shorted on board
 
 // TSL2561 registers
-#define TSL2561_CMD            0x80
-#define TSL2561_CMD_CLEAR      0xC0
-#define	TSL2561_REG_CONTROL    0x00
-#define	TSL2561_REG_TIMING     0x01
-#define	TSL2561_REG_THRESH_L   0x02
-#define	TSL2561_REG_THRESH_H   0x04
-#define	TSL2561_REG_INTCTL     0x06
-#define	TSL2561_REG_ID         0x0A
-#define	TSL2561_REG_DATA_0     0x0C
-#define	TSL2561_REG_DATA_1     0x0E
+#define TSL2561_CMD                                0x80
+#define TSL2561_CMD_CLEAR                          0xC0
+#define	TSL2561_REG_CONTROL                        0x00
+#define	TSL2561_REG_TIMING                         0x01
+#define	TSL2561_REG_THRESH_L                       0x02
+#define	TSL2561_REG_THRESH_H                       0x04
+#define	TSL2561_REG_INTCTL                         0x06
+#define	TSL2561_REG_ID                             0x0A
+#define	TSL2561_REG_DATA_0                         0x0C
+#define	TSL2561_REG_DATA_1                         0x0E
+
+#define TSL2561_INTERRUPT_CONTROL_DISABLED         0b00
+#define TSL2561_INTERRUPT_CONTROL_LEVEL            0b01
+#define TSL2561_INTERRUPT_CONTROL_SMBALERT         0b10
+
+#define TSL2561_INTERRUPT_PSELECT_EVERY_ADC        0b0000
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_ANY 0b0001
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_2   0b0010
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_3   0b0011
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_4   0b0100
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_5   0b0101
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_6   0b0110
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_7   0b0110
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_8   0b0111
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_9   0b1001
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_10  0b1010
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_11  0b1011
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_12  0b1100
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_13  0b1101
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_14  0b1110
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_15  0b1111
+
+#define TSL2561_INTERRUPT_CONTROL_DISABLED 0b00
 
 class TSL2561 {
 	public:
