@@ -79,9 +79,6 @@ void setup() {
 		BATTERY_MODE_EXTERNAL_MESSUREMENT, 7, 1, BATTERY_MEASSUREMENT_FACTOR, 10000
 	);
 
-//	char batLowTreshold[1];
-//	memcpy_P(batLowTreshold, &dParm.p[20], 1);
-//	hm.battery.setMinVoltage((int)batLowTreshold);
 	hm.battery.setMinVoltage(BATTERY_MIN_VOLTAGE);
 
 	hm.setPowerMode(3);															// power mode for HM device
@@ -110,9 +107,9 @@ void getPgmSpaceData(uint8_t *buffer, uint16_t address, uint8_t len) {
 }
 
 void loop() {
-#ifdef SER_DBG
-	parser.poll();																// handle serial input from console
-#endif
+	#ifdef SER_DBG
+		parser.poll();															// handle serial input from console
+	#endif
 	hm.poll();																	// poll the HM communication
 }
 
@@ -122,7 +119,10 @@ void HM_Status_Request(uint8_t *data, uint8_t len) {
 }
 
 void HM_Reset_Cmd(uint8_t *data, uint8_t len) {
+	#ifdef SER_DBG
 		Serial << F("reset, data: ") << pHex(data,len) << '\n';
+	#endif
+
 	hm.send_ACK();																// send an ACK
 	if (data[0] == 0) {
 		hm.reset();																// do a reset only if channel is 0
