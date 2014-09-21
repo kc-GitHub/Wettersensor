@@ -21,7 +21,7 @@
  */
 //#define SER_DBG
 
-#define FIRMWARE_VERSION     0x0B												// 0.11
+#define FIRMWARE_VERSION     0x0C												// 0.12
 
 /*
  * Address data if we don't read them from bootloader section

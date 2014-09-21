@@ -27,34 +27,33 @@ sub CUL_HM_ParseTHPLSensor(@){
 		my $name = $shash->{NAME};
 		my $chn = '01';
 
-		my ($dTempBat, $hum, $pressure, $luminosity, $batVoltage) = map{hex($_)} unpack ('A4A2A4A8A4A8A8', $msgData);
+		my ($dTempBat, $humidity, $pressure, $luminosity, $batVoltage) = map{hex($_)} unpack ('A4A2A4A8A4', $msgData);
 
+		# temperature
 		my $temperature =  $dTempBat & 0x7fff;
 		$temperature = ($temperature &0x4000) ? $temperature - 0x8000 : $temperature; 
 		$temperature = sprintf('%0.1f', $temperature / 10);
 
 		my $stateMsg = 'state:T: ' . $temperature;
 		push (@events, [$shash, 1, 'temperature:' . $temperature]);
+
+		# battery state
 		push (@events, [$shash, 1, 'battery:' . ($dTempBat & 0x8000 ? 'low' : 'ok')]);
 
-		$luminosity = ($luminosity + 0.0) / 100;
-		$luminosity = ($luminosity < 100) ? $luminosity : sprintf('%.0f', $luminosity);
+		# battery voltage
 		$batVoltage = sprintf('%.2f', (($batVoltage + 0.00) / 1000));
-
-		if ($modules{CUL_HM}{defptr}{$src.$chn}){
-			my $ch = $modules{CUL_HM}{defptr}{$src.$chn};
-			push (@events, [$ch, 1, $stateMsg]);
-			push (@events, [$ch, 1, 'temperature:' . $temperature]);
-		}
+		push (@events, [$shash, 1, 'batVoltage:' . $batVoltage]);
 
 		# humidity
-		if ($hum)                 {
-			$stateMsg .= ' H: ' . $hum;
-			push (@events, [$shash, 1, 'humidity:' . $hum]);
+		if ($humidity)                 {
+			$stateMsg .= ' H: ' . $humidity;
+			push (@events, [$shash, 1, 'humidity:' . $humidity]);
 		}
 		
 		# luminosity
-		if ($luminosity < 65538) {
+		if ($luminosity < 6553800) {
+			$luminosity = ($luminosity + 0.0) / 100;
+			$luminosity = ($luminosity < 100) ? $luminosity : sprintf('%.0f', $luminosity);
 			$stateMsg .= ' L: ' . $luminosity;
 			push (@events, [$shash, 1, 'luminosity:' . $luminosity]);
 		}
@@ -62,8 +61,10 @@ sub CUL_HM_ParseTHPLSensor(@){
 		# air pressure
 		if ($pressure) {
 			$pressure = $pressure / 10;
-			$stateMsg .= ' P: '    . $pressure;
-			push (@events, [$shash, 1, 'pressure:'    . $pressure]);
+
+			my $pressureTxt = sprintf('%.1f', $pressure);
+			$stateMsg .= ' P: '    . $pressureTxt;
+			push (@events, [$shash, 1, 'pressure:'    . $pressureTxt]);
 
 			my $altitude = AttrVal('global', 'altitude', 0);
 			my $pressureNN = $altitude ? sprintf('%.1f', ($pressure + ($altitude / 8.5))) : 0;
@@ -73,8 +74,6 @@ sub CUL_HM_ParseTHPLSensor(@){
 			}
 		}
 
-		$stateMsg .= ' batVoltage: ' . $batVoltage;  push (@events, [$shash, 1, 'batVoltage:' . $batVoltage]);
-		
 		push (@events, [$shash, 1, $stateMsg]);
 	}
 

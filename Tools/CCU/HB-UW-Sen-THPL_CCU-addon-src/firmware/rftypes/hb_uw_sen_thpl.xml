@@ -84,7 +84,7 @@
           </description>
         </parameter>
         <parameter id="LUMINOSITY" operations="read,event">
-          <logical type="float" min="0" max="65537">
+          <logical type="float" min="0" max="65535">
             <special_value id="NO_SENSOR" value="65538" />
           </logical>
           <physical type="integer" interface="command" value_id="LUMINOSITY">

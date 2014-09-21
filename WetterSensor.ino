@@ -71,9 +71,6 @@ void setup() {
 
 	hm.cc.config(10,11,12,13,2,0);												// CS, MOSI, MISO, SCK, GDO0, Interrupt
 
-	hm.statusLed.config(4, 4);													// configure the status led pin
-	hm.statusLed.set(STATUSLED_BOTH, STATUSLED_MODE_BLINKFAST, 3);
-
 	// setup battery measurement
 	hm.battery.config(
 		BATTERY_MODE_EXTERNAL_MESSUREMENT, 7, 1, BATTERY_MEASSUREMENT_FACTOR, 10000
@@ -92,6 +89,11 @@ void setup() {
 
 	byte rr = MCUSR;
 	MCUSR =0;
+
+	// initialization done, we blink 3 times
+	hm.statusLed.config(4, 4);													// configure the status led pin
+	hm.statusLed.set(STATUSLED_BOTH, STATUSLED_MODE_BLINKFAST, 3);
+
 }
 
 void getDataFromAddressSection(uint8_t *buffer, uint8_t bufferStartAddress, uint16_t sectionAddress, uint8_t dataLen) {
