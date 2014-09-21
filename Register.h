@@ -3,7 +3,6 @@
 #define FRAME_TYPE           0x70										// Frame type 0x70 = WEATHER_EVENT
 #define DEVICE_INFO          0x03, 0x01, 0x00							// Device Info, 3 byte, describes device, not completely clear yet. includes amount of channels
 
-
 #if USE_ADRESS_SECTION == 1
 	uint8_t devParam[] = {
 		FIRMWARE_VERSION,
@@ -31,8 +30,8 @@ HM::s_devParm dParm = {
 };
 
 HM::s_modtable modTbl[] = {
-	{0,0,(s_mod_dlgt)NULL},
-	{0,0,(s_mod_dlgt)NULL},
+	{ 0, 0, (s_mod_dlgt) NULL },
+	{ 0, 0, (s_mod_dlgt) NULL },
 }; // 16 byte
 
 // channel slice definition, 6 bytes
@@ -71,9 +70,9 @@ struct s_regs {
 
 // channel device list table, 22 bytes
 s_cnlDefType cnlDefType[] PROGMEM = {
-	// cnl, lst, pMax, sIdx, sLen, pAddr, pPeer, *pRegs;	// pointer to regs structure
-	{0, 0, 0, 0x00, 5, 0x0000, 0x0000, (void*)&regs.ch0.l0},
-	{1, 4, 6, 0x05, 1, 0x0005, 0x0000, (void*)&regs.ch1.l4},
+	// cnl, lst, pMax, sIdx, sLen, pAddr,  pPeer,  *pRegs (pointer to regs structure)
+	   { 0, 0,   0,    0x00, 5,    0x0000, 0x0000, (void*)&regs.ch0.l0},
+	   { 1, 4,   6,    0x05, 1,    0x0005, 0x0000, (void*)&regs.ch1.l4},
 };
 
 
@@ -84,23 +83,22 @@ HM::s_devDef dDef = {
 
 /**
  * eeprom definition, 16 bytes
- * define start address  and size in eeprom for magicNumber, peerDB, regsDB, userSpace
+ * define start address 	 and size in eeprom for magicNumber, peerDB, regsDB, userSpace
  */
 HM::s_eeprom ee[] = {
-	{0x0000, 0x0002, 0x001a, 0x0025,},
-	{0x0002, 0x0018, 0x000b, 0x0000,},
+	//magicNum, peerDB, regsDB, userSpace
+	{   0x0000, 0x0002, 0x001a, 0x0025, },	// start address
+	{   0x0002, 0x0018, 0x000b, 0x0000, },	// length
 };
 
-
-
 // defaults definitions
-const uint8_t regs01[] PROGMEM = {0x00,0x63,0x19,0x63};
-const uint8_t regs03[] PROGMEM = {0x1f,0xa6,0x5c,0x06};
-const uint8_t regs04[] PROGMEM = {0x1f,0xa6,0x5c,0x05};
+const uint8_t regs01[] PROGMEM = {0x00, 0x63, 0x19, 0x63};
+const uint8_t regs03[] PROGMEM = {0x1f, 0xa6, 0x5c, 0x06};
+const uint8_t regs04[] PROGMEM = {0x1f, 0xa6, 0x5c, 0x05};
 
 s_defaultRegsTbl defaultRegsTbl[] = {
 	// peer(0) or regs(1), channel, list, peer index, len, pointer to payload
-	{  1,                  0,       0,    0,          5,   regs01},
+	{ 1,                   0,       0,    0,          5,   regs01 },
 };
 
 HM::s_dtRegs dtRegs = {
