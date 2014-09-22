@@ -12,7 +12,11 @@ $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'}      = {burstRx =>1};
 $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-O'}      = $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'};
 
 # subtype channel mapping
-$HMConfig::culHmSubTypeSets{'THPLSensor'} = {peerChan => '0 <actChn> ... single [set|unset] [actor|remote|both]'};
+$HMConfig::culHmSubTypeSets{'THPLSensor'}    = {
+	peerChan  => '0 <actChn> ... single [set|unset] [actor|remote|both]',
+	fwUpdate  => '<filename> <bootTime> ...',
+	getSerial => ''
+};
 
 # Subtype spezific funtions
 sub CUL_HM_ParseTHPLSensor(@){
