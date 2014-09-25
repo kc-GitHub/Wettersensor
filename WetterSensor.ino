@@ -126,7 +126,7 @@ void HM_Reset_Cmd(uint8_t *data, uint8_t len) {
 	#endif
 
 	hm.send_ACK();																// send an ACK
-	if (data[0] == 0) {
+	if (data[1] == 0) {
 		hm.reset();																// do a reset only if channel is 0
 	}
 }
