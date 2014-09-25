@@ -36,11 +36,6 @@
 #define BATTERY_MEASSUREMENT_FACTOR 0.164										// Faktor Spannungsteiler externe Batteriemessung
 #define BATTERY_MIN_VOLTAGE         22											// Faktor Spannungsteiler externe Batteriemessung
 
-void HM_Reset_Cmd(uint8_t *data, uint8_t len);
-void sendPairing();
-void resetDevice();
-void sendCmdStr();
-void buttonSend();
-void printConfig();
+
 void getPgmSpaceData(uint8_t *buffer, uint16_t address, uint8_t len);
 void getDataFromAddressSection(uint8_t *buffer, uint8_t bufferStartAddress, uint16_t sectionAddress, uint8_t dataLen);
