@@ -30,7 +30,6 @@ void setup() {
 	#ifdef SER_DBG
 		Serial.begin(57600);													// serial setup
 		Serial << F("Starting sketch...\n");									// ...and some information
-		Serial << pCharPGM(helptext1) << '\n';
 		Serial << F("freeMem: ") << freeMem() << F(" byte") <<'\n';
 	#endif
 
@@ -83,9 +82,6 @@ void getPgmSpaceData(uint8_t *buffer, uint16_t address, uint8_t len) {
 }
 
 void loop() {
-	#ifdef SER_DBG
-		parser.poll();															// handle serial input from console
-	#endif
 	hm.poll();																	// poll the HM communication
 }
 
@@ -114,13 +110,13 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 	hm.setPowerMode(POWER_MODE_SLEEP_WDT);
 
 	#ifdef SER_DBG
-		Serial << "config changed, data: " << pHex(data,len) << '\n';
-		Serial << "lowBatLimit: " << regs.ch0.l0.lowBatLimit << '\n';
-		Serial << "ledMode: " << regs.ch0.l0.ledMode << '\n';
-		Serial << "burstRx: " << regs.ch0.l0.burstRx << '\n';
+		Serial << F("config changed, data: ") << pHex(data,len) << '\n';
+		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << '\n';
+		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << '\n';
+		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << '\n';
 	#endif
 }
 
 void HM_Remote_Event(uint8_t *data, uint8_t len) {
-	//	Serial << F("remote event, data: ") << pHex(data,len) << '\n';
+	// Serial << F("remote event, data: ") << pHex(data,len) << '\n';
 }
