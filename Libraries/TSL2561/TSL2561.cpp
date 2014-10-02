@@ -264,12 +264,11 @@ boolean TSL2561::setInterruptControl(unsigned char control, unsigned char persis
  * Returns true (1) if successful, false (0) if there was an I2C error
  * (Also see getError() below)
  */
-boolean TSL2561::setInterruptThreshold(unsigned int low, unsigned int high) {
-	// Write low and high threshold values
-	if (writeUInt(TSL2561_REG_THRESH_L,low) && writeUInt(TSL2561_REG_THRESH_H,high)) {
+boolean TSL2561::setInterruptThreshold(uint16_t low, uint16_t high) {
+	if (writeUInt(TSL2561_REG_THRESH_L, low) && writeUInt(TSL2561_REG_THRESH_H, high) ) {
 		return(true);
 	}
-		
+
 	return(false);
 }
 

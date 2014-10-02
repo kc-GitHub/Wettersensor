@@ -43,7 +43,7 @@
 #define TSL2561_INTERRUPT_CONTROL_SMBALERT         0b10
 
 #define TSL2561_INTERRUPT_PSELECT_EVERY_ADC        0b0000
-#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_ANY 0b0001
+#define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_1   0b0001
 #define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_2   0b0010
 #define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_3   0b0011
 #define TSL2561_INTERRUPT_PSELECT_OUT_OF_RANGE_4   0b0100
@@ -162,7 +162,7 @@ class TSL2561 {
 		 * Returns true (1) if successful, false (0) if there was an I2C error
 		 * (Also see getError() below)
 		 */
-		boolean setInterruptThreshold(unsigned int low, unsigned int high);
+		boolean setInterruptThreshold(uint16_t low, uint16_t high);
 
 		/*
 		 * Clears an active interrupt
