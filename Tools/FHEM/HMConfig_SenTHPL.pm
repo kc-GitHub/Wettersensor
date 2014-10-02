@@ -4,18 +4,39 @@ use strict;
 use warnings;
 
 # device definition
-$HMConfig::culHmModel{'F101'}             = {name => 'HB-UW-Sen-THPL-I',   st   => 'THPLSensor',   cyc  => '00:10',   rxt  => 'c:f',   lst  => 'p',   chn  => '',};
-$HMConfig::culHmModel{'F102'}             = {name => 'HB-UW-Sen-THPL-O',   st   => 'THPLSensor',   cyc  => '00:10',   rxt  => 'c:f',   lst  => 'p',   chn  => '',};
+$HMConfig::culHmModel{'F101'} = {name => 'HB-UW-Sen-THPL-I', st => 'THPLSensor', cyc => '00:10', rxt => 'c:f', lst  => 'p',   chn  => '',};
+$HMConfig::culHmModel{'F102'} = {name => 'HB-UW-Sen-THPL-O', st => 'THPLSensor', cyc => '00:10', rxt => 'c:f', lst  => 'p',   chn  => '',};
+
+$HMConfig::culHmRegDefine{'lowBatLimitTHPL'} = {
+	a   => 18.0,
+	s   => 1.0,
+	l   => 0,
+	min => 1.5,
+	max => 5,
+	c   => '',
+	f   => 10,
+	u   => 'V', 
+	d   => 0,
+	t   => 'Low batterie limit, step 0.1 V.'
+};
 
 # Register model mapping
-$HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'}      = {burstRx =>1};
-$HMConfig::culHmRegModel{'HB-UW-Sen-THPL-O'}      = $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'};
+$HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'} = {
+	'burstRx'         => 1,
+	'lowBatLimitTHPL' => 1,
+	'ledMode'         => 1
+};
+
+$HMConfig::culHmRegModel{'HB-UW-Sen-THPL-O'} = $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'};
 
 # subtype channel mapping
 $HMConfig::culHmSubTypeSets{'THPLSensor'}    = {
-	peerChan  => '0 <actChn> ... single [set|unset] [actor|remote|both]',
-	fwUpdate  => '<filename> <bootTime> ...',
-	getSerial => ''
+	'peerChan'   => '0 <actChn> ... single [set|unset] [actor|remote|both]',
+	'fwUpdate'   => '<filename> <bootTime> ...',
+	'getSerial'  => '',
+	'getVersion' => '',
+	'statusRequest' => '',
+	'burstXmit' => ''
 };
 
 # Subtype spezific funtions

@@ -7,8 +7,10 @@
 // homematic communication
 HM::s_jumptable jTbl[] = {														// jump table for HM communication
 	// byte3, byte10, byte11, function to call									// 0xff means - any byte
-	{  0x11,  0x04,  0x00,    HM_Reset_Cmd },
-	{ 0x00 }
+	 { 0x11,  0x04,  0x00,    cmdReset },										// Reset message
+	 { 0x01,  0xFF,  0x06,    cmdConfigChanged },								// Config end message
+	 { 0x01,  0xFF,  0x0E,    cmdStatusRequest },
+	 { 0x00 }
 };
 
 Buttons button[1];																// declare remote button object
@@ -49,10 +51,7 @@ void setup() {
 		BATTERY_MODE_EXTERNAL_MESSUREMENT, 7, 1, BATTERY_MEASSUREMENT_FACTOR, 10000
 	);
 
-	hm.battery.setMinVoltage(BATTERY_MIN_VOLTAGE);
-
-	hm.setPowerMode(3);															// power mode for HM device
-	hm.init();																	// initialize the hm module
+	hm.init(RESET_MODE_HARD);													// initialize the hm module
 
 	button[0].regInHM(0, &hm);													// register buttons in HM per channel, handover HM class pointer
 	button[0].config(8, NULL);													// configure button on specific pin and handover a function pointer to the main sketch
@@ -62,6 +61,8 @@ void setup() {
 
 	byte rr = MCUSR;
 	MCUSR =0;
+
+	cmdConfigChanged(0, 0);
 
 	// initialization done, we blink 3 times
 	hm.statusLed.config(4, 4);													// configure the status led pin
@@ -88,12 +89,7 @@ void loop() {
 	hm.poll();																	// poll the HM communication
 }
 
-//- HM functions ----------------------------------------------------------------------------------------------------------
-void HM_Status_Request(uint8_t *data, uint8_t len) {
-	//	Serial << F("status request, data: ") << pHex(data,len) << '\n';
-}
-
-void HM_Reset_Cmd(uint8_t *data, uint8_t len) {
+void cmdReset(uint8_t *data, uint8_t len) {
 	#ifdef SER_DBG
 		Serial << F("reset, data: ") << pHex(data,len) << '\n';
 	#endif
@@ -104,8 +100,25 @@ void HM_Reset_Cmd(uint8_t *data, uint8_t len) {
 	}
 }
 
-void HM_Config_Changed(uint8_t *data, uint8_t len) {
-	//	Serial << F("config changed, data: ") << pHex(data,len) << '\n';
+void cmdConfigChanged(uint8_t *data, uint8_t len) {
+	// low battery level
+	uint8_t lowBatVoltage = regs.ch0.l0.lowBatLimit;
+	lowBatVoltage = (lowBatVoltage < BATTERY_MIN_VOLTAGE) ? BATTERY_MIN_VOLTAGE : lowBatVoltage;
+	lowBatVoltage = (lowBatVoltage > BATTERY_MAX_VOLTAGE) ? BATTERY_MAX_VOLTAGE : lowBatVoltage;
+	hm.battery.setMinVoltage(lowBatVoltage);
+
+	// led mode
+	hm.setLedMode((regs.ch0.l0.ledMode) ? LED_MODE_EVERYTIME : LED_MODE_CONFIG);
+
+	// power mode for HM device
+	hm.setPowerMode(POWER_MODE_SLEEP_WDT);
+
+	#ifdef SER_DBG
+		Serial << "config changed, data: " << pHex(data,len) << '\n';
+		Serial << "lowBatLimit: " << regs.ch0.l0.lowBatLimit << '\n';
+		Serial << "ledMode: " << regs.ch0.l0.ledMode << '\n';
+		Serial << "burstRx: " << regs.ch0.l0.burstRx << '\n';
+	#endif
 }
 
 void HM_Remote_Event(uint8_t *data, uint8_t len) {

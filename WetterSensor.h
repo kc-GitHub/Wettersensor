@@ -34,8 +34,12 @@
 #endif
 
 #define BATTERY_MEASSUREMENT_FACTOR 0.164										// Faktor Spannungsteiler externe Batteriemessung
-#define BATTERY_MIN_VOLTAGE         22											// Faktor Spannungsteiler externe Batteriemessung
-
+#define BATTERY_MIN_VOLTAGE         15											// minimal configuable low battery voltage level
+#define BATTERY_MAX_VOLTAGE         50											// maximal configuable low battery voltage level
 
 void getPgmSpaceData(uint8_t *buffer, uint16_t address, uint8_t len);
 void getDataFromAddressSection(uint8_t *buffer, uint8_t bufferStartAddress, uint16_t sectionAddress, uint8_t dataLen);
+
+void cmdConfigChanged(uint8_t *data, uint8_t len);
+void cmdReset(uint8_t *data, uint8_t len);
+void cmdStatusRequest(uint8_t *data, uint8_t len);

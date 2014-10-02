@@ -30,22 +30,28 @@ HM::s_devParm dParm = {
 };
 
 HM::s_modtable modTbl[] = {
-	{ 0, 0, (s_mod_dlgt) NULL },
-	{ 0, 0, (s_mod_dlgt) NULL },
+	{ 0, 0, (s_mod_dlgt) NULL },										// ???
+	{ 0, 0, (s_mod_dlgt) NULL },										// ???
 }; // 16 byte
 
-// channel slice definition, 6 bytes
+/**
+ * channel slice definition
+ * Each value represents a register index defined in s_regDevL0 below
+ */
 uint8_t sliceStr[] = {
-	0x01, 0x02, 0x0a, 0x0b, 0x0c, 0x01,
+	0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12
 };
 
-// Channel device config
+/**
+ * Register definition for List 0
+ */
 struct s_regDevL0 {
-	// 0x01,0x02,0x0a,0x0b,0x0c,
-	uint8_t  burstRx;        // 0x01, s:0, e:0
-	uint8_t             :7;  //       l:0, s:7
-	uint8_t  intKeyVisib:1;  // 0x02, s:7, e:8
-	uint8_t  pairCentral[3]; // 0x0a, s:0, e:0
+	// 0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12
+	uint8_t burstRx;         // 0x01,             startBit:0, bits:8
+	uint8_t             :6;  // 0x05              startBit:0, bits:6
+	uint8_t ledMode     :2;  // 0x05,             startBit:6, bits:2
+	uint8_t pairCentral[3];  // 0x0A, 0x0B, 0x0C, startBit:0, bits:8 (3 mal)
+	uint8_t lowBatLimit;     // 0x12,             startBit:0, bits:8
 };
 
 struct s_regChanL4 {
@@ -67,14 +73,14 @@ struct s_regs {
 	s_regChan ch1;
 } regs; // 11 byte
 
-
-// channel device list table, 22 bytes
+/**
+ * channel device list table, 22 bytes
+ */
 s_cnlDefType cnlDefType[] PROGMEM = {
-	// cnl, lst, pMax, sIdx, sLen, pAddr,  pPeer,  *pRegs (pointer to regs structure)
-	   { 0, 0,   0,    0x00, 5,    0x0000, 0x0000, (void*)&regs.ch0.l0},
-	   { 1, 4,   6,    0x05, 1,    0x0005, 0x0000, (void*)&regs.ch1.l4},
+	// cnl, lst, peersMax, sIdx, sLen, pAddr,  pPeer,  *pRegs (pointer to regs structure)
+	 { 0,   0,   0,        0x00, 6,    0x0000, 0x0000, (void*)&regs.ch0.l0},	// List 0
+	 { 1,   4,   6,        0x05, 1,    0x0005, 0x0000, (void*)&regs.ch1.l4},	// List 4
 };
-
 
 // handover to AskSin lib, 6 bytes
 HM::s_devDef dDef = {
@@ -82,8 +88,8 @@ HM::s_devDef dDef = {
 };
 
 /**
- * eeprom definition, 16 bytes
- * define start address 	 and size in eeprom for magicNumber, peerDB, regsDB, userSpace
+ * EEprom definition, 16 bytes
+ * Define start address and size in eeprom for magicNumber, peerDB, regsDB, userSpace
  */
 HM::s_eeprom ee[] = {
 	//magicNum, peerDB, regsDB, userSpace
@@ -91,18 +97,20 @@ HM::s_eeprom ee[] = {
 	{   0x0002, 0x0018, 0x000b, 0x0000, },	// length
 };
 
-// defaults definitions
-const uint8_t regs01[] PROGMEM = {0x00, 0x63, 0x19, 0x63};
-const uint8_t regs03[] PROGMEM = {0x1f, 0xa6, 0x5c, 0x06};
+/**
+ * Definitions for EEprom defaults.
+ * Must enter in same order as e.g. defined in s_regDevL0
+ */
+const uint8_t regs00[] PROGMEM = {0x00, 0x64, 0x00, 0x00, 0x00, 0x12};
 const uint8_t regs04[] PROGMEM = {0x1f, 0xa6, 0x5c, 0x05};
 
 s_defaultRegsTbl defaultRegsTbl[] = {
 	// peer(0) or regs(1), channel, list, peer index, len, pointer to payload
-	{ 1,                   0,       0,    0,          5,   regs01 },
+	{ 1,                   0,       0,    0,          6,   regs00 },
 };
 
 HM::s_dtRegs dtRegs = {
-	// amount of lines in defaultRegsTbl[], pointer to defaultRegsTbl[]
-	0, defaultRegsTbl
+	//amount of lines in defaultRegsTbl[], pointer to defaultRegsTbl[]
+	1,                                     defaultRegsTbl
 };
 
