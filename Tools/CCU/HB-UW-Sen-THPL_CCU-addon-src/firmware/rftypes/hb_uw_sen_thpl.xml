@@ -29,6 +29,10 @@
       <physical type="integer" interface="config" list="0" index="18" size="1" />
       <conversion type="float_integer_scale" factor="10" />
     </parameter>
+    <parameter id="Altitude">
+      <logical type="integer" min="-500" max="10000" default="0" unit="m" />
+      <physical type="integer" interface="config" list="0" index="19" size="2" />
+    </parameter>
   </paramset>
   <channels>
     <channel index="0" type="MAINTENANCE" ui_flags="internal" class="maintenance" count="1">

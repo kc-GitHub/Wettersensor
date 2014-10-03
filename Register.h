@@ -24,7 +24,7 @@
 #endif
 
 HM::s_devParm dParm = {
-	5,																	// send retries, 1 byte, how often a string should be send out until we get an answer
+	3,																	// send retries, 1 byte, how often a string should be send out until we get an answer
 	700,																// send timeout, 2 byte, time out for ACK handling
 	devParam															// pointer to devParam, see above
 };
@@ -39,19 +39,21 @@ HM::s_modtable modTbl[] = {
  * Each value represents a register index defined in s_regDevL0 below
  */
 uint8_t sliceStr[] = {
-	0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12
+	0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12, 0x13, 0x14, 0x30
 };
 
 /**
  * Register definition for List 0
  */
 struct s_regDevL0 {
-	// 0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12
+	// 0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12, 0x30
 	uint8_t burstRx;         // 0x01,             startBit:0, bits:8
 	uint8_t             :6;  // 0x05              startBit:0, bits:6
 	uint8_t ledMode     :2;  // 0x05,             startBit:6, bits:2
 	uint8_t pairCentral[3];  // 0x0A, 0x0B, 0x0C, startBit:0, bits:8 (3 mal)
 	uint8_t lowBatLimit;     // 0x12,             startBit:0, bits:8
+	uint8_t altitude[2];     // 0x13, 0x14        startBit:0, bits:8
+	uint8_t transmitTryMax;  // 0x30,             startBit:0, bits:8
 };
 
 struct s_regChanL4 {
@@ -78,7 +80,7 @@ struct s_regs {
  */
 s_cnlDefType cnlDefType[] PROGMEM = {
 	// cnl, lst, peersMax, sIdx, sLen, pAddr,  pPeer,  *pRegs (pointer to regs structure)
-	 { 0,   0,   0,        0x00, 6,    0x0000, 0x0000, (void*)&regs.ch0.l0},	// List 0
+	 { 0,   0,   0,        0x00, 9,    0x0000, 0x0000, (void*)&regs.ch0.l0},	// List 0
 	 { 1,   4,   6,        0x05, 1,    0x0005, 0x0000, (void*)&regs.ch1.l4},	// List 4
 };
 
@@ -94,19 +96,19 @@ HM::s_devDef dDef = {
 HM::s_eeprom ee[] = {
 	//magicNum, peerDB, regsDB, userSpace
 	{   0x0000, 0x0002, 0x001a, 0x0025, },	// start address
-	{   0x0002, 0x0018, 0x000b, 0x0000, },	// length
+	{   0x0002, 0x0030, 0x000b, 0x0000, },	// length
 };
 
 /**
  * Definitions for EEprom defaults.
  * Must enter in same order as e.g. defined in s_regDevL0
  */
-const uint8_t regs00[] PROGMEM = {0x00, 0x64, 0x00, 0x00, 0x00, 0x12};
+const uint8_t regs00[] PROGMEM = {0x00, 0x64, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x03};
 const uint8_t regs04[] PROGMEM = {0x1f, 0xa6, 0x5c, 0x05};
 
 s_defaultRegsTbl defaultRegsTbl[] = {
 	// peer(0) or regs(1), channel, list, peer index, len, pointer to payload
-	{ 1,                   0,       0,    0,          6,   regs00 },
+	{ 1,                   0,       0,    0,          9,   regs00 },
 };
 
 HM::s_dtRegs dtRegs = {

@@ -109,11 +109,25 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 	// power mode for HM device
 	hm.setPowerMode(POWER_MODE_SLEEP_WDT);
 
+	// set max transmit retry
+	uint8_t transmitTryMax = regs.ch0.l0.transmitTryMax;
+	transmitTryMax = (transmitTryMax < 1) ? 1 : transmitTryMax;
+	transmitTryMax = (transmitTryMax > 6) ? 6 : transmitTryMax;
+	dParm.maxRetr = transmitTryMax;
+
+	// set altitude
+	int16_t altitude = regs.ch0.l0.altitude[1] | (regs.ch0.l0.altitude[0] << 8);
+	altitude = (altitude < -500) ? -500 : altitude;
+	altitude = (altitude > 10000) ? 10000 : altitude;
+	sensTHPL.setAltitude(altitude);
+
 	#ifdef SER_DBG
 		Serial << F("config changed, data: ") << pHex(data,len) << '\n';
-		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << '\n';
-		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << '\n';
-		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << '\n';
+//		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << '\n';
+//		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << '\n';
+//		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << '\n';
+//		Serial << F("transmitTryMax: ") << transmitTryMax << '\n';
+//		Serial << F("altitude: ") << altitude << '\n';
 	#endif
 }
 

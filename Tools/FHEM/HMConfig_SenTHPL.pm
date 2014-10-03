@@ -7,36 +7,29 @@ use warnings;
 $HMConfig::culHmModel{'F101'} = {name => 'HB-UW-Sen-THPL-I', st => 'THPLSensor', cyc => '00:10', rxt => 'c:f', lst  => 'p',   chn  => '',};
 $HMConfig::culHmModel{'F102'} = {name => 'HB-UW-Sen-THPL-O', st => 'THPLSensor', cyc => '00:10', rxt => 'c:f', lst  => 'p',   chn  => '',};
 
-$HMConfig::culHmRegDefine{'lowBatLimitTHPL'} = {
-	a   => 18.0,
-	s   => 1.0,
-	l   => 0,
-	min => 1.5,
-	max => 5,
-	c   => '',
-	f   => 10,
-	u   => 'V', 
-	d   => 0,
-	t   => 'Low batterie limit, step 0.1 V.'
-};
+$HMConfig::culHmRegDefine{'lowBatLimitTHPL'}    = {a=> 18.0,s=>1.0,l=>0,min=>1.5 ,max=>5    ,c=>'',f=>10,u=>'V',  d=>0,t=>'Low batterie limit, step 0.1 V.'};
+$HMConfig::culHmRegDefine{'altitude'}           = {a=> 19.0,s=>2.0,l=>0,min=>-500,max=>10000,c=>'',f=>'',u=>'m'  ,d=>0,t=>'Altitude for calculate air pressure at see level in meter.'};
+$HMConfig::culHmRegDefine{'transmitTryMaxTHPL'} = {a=> 48.0,s=>1.0,l=>0,min=>1   ,max=>6    ,c=>'',f=>'',u=>''   ,d=>0,t=>'max message re-transmit'};
 
 # Register model mapping
 $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'} = {
 	'burstRx'         => 1,
 	'lowBatLimitTHPL' => 1,
-	'ledMode'         => 1
+	'ledMode'            => 1,
+	'transmitTryMaxTHPL' => 1,
+	'altitude' => 1
 };
 
 $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-O'} = $HMConfig::culHmRegModel{'HB-UW-Sen-THPL-I'};
 
 # subtype channel mapping
 $HMConfig::culHmSubTypeSets{'THPLSensor'}    = {
-	'peerChan'   => '0 <actChn> ... single [set|unset] [actor|remote|both]',
-	'fwUpdate'   => '<filename> <bootTime> ...',
-	'getSerial'  => '',
-	'getVersion' => '',
-	'statusRequest' => '',
-	'burstXmit' => ''
+	'peerChan'       => '0 <actChn> ... single [set|unset] [actor|remote|both]',
+	'fwUpdate'       => '<filename> <bootTime> ...',
+	'getSerial'      => '',
+	'getVersion'     => '',
+	'statusRequest'  => '',
+	'burstXmit'      => ''
 };
 
 # Subtype spezific funtions
@@ -91,8 +84,9 @@ sub CUL_HM_ParseTHPLSensor(@){
 			$stateMsg .= ' P: '    . $pressureTxt;
 			push (@events, [$shash, 1, 'pressure:'    . $pressureTxt]);
 
-			my $altitude = AttrVal('global', 'altitude', 0);
-			my $pressureNN = $altitude ? sprintf('%.1f', ($pressure + ($altitude / 8.5))) : 0;
+			my ($rAltitude) = split(' ', ReadingsVal($name, 'R-altitude', 0));
+			my $altitude = AttrVal('global', 'altitude', -9999);
+			my $pressureNN = ($altitude > -9999 && $rAltitude == 0) ? sprintf('%.1f', ($pressure + ($altitude / 8.5))) : 0;
 			if ($pressureNN) {
 				$stateMsg .= ' P-NN: ' . $pressureNN;
 				push (@events, [$shash, 1, 'pressure-nn:' . $pressureNN]);
