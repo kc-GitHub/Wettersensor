@@ -67,6 +67,11 @@ void setup() {
 	hm.statusLed.config(4, 4);													// configure the status led pin
 	hm.statusLed.set(STATUSLED_BOTH, STATUSLED_MODE_BLINKFAST, 3);
 
+	/** Debug start */
+//	pinMode(5, OUTPUT);
+//	pinMode(6, OUTPUT);
+//	digitalWrite(5, 1);
+	/** Debug end */
 }
 
 void getDataFromAddressSection(uint8_t *buffer, uint8_t bufferStartAddress, uint16_t sectionAddress, uint8_t dataLen) {
@@ -108,6 +113,8 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 
 	// power mode for HM device
 	hm.setPowerMode(POWER_MODE_SLEEP_WDT);
+//	hm.setPowerMode((regs.ch0.l0.burstRx) ? POWER_MODE_BURST : POWER_MODE_SLEEP_WDT);
+//	hm.setPowerMode(POWER_MODE_ON);
 
 	// set max transmit retry
 	uint8_t transmitTryMax = regs.ch0.l0.transmitTryMax;
@@ -131,6 +138,11 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 	#endif
 }
 
+void cmdStatusRequest(uint8_t *data, uint8_t len) {
+	Serial << F("status request, data: ") << pHex(data,len) << '\n';
+	_delay_ms(50);
+}
+
 void HM_Remote_Event(uint8_t *data, uint8_t len) {
-	// Serial << F("remote event, data: ") << pHex(data,len) << '\n';
+	Serial << F("remote event, data: ") << pHex(data,len) << '\n';
 }

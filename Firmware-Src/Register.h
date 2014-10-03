@@ -56,6 +56,7 @@ struct s_regDevL0 {
 	uint8_t transmitTryMax;  // 0x30,             startBit:0, bits:8
 };
 
+// todo
 struct s_regChanL4 {
 	// 0x01,
 	uint8_t  peerNeedsBurst:1; // 0x01, s:0, e:1

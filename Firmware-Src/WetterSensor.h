@@ -19,7 +19,7 @@
 /**
  * Activate for serial debug infos
  */
-//#define SER_DBG
+#define SER_DBG
 
 #define FIRMWARE_VERSION     0x0D												// 0.13
 
