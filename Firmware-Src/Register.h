@@ -39,21 +39,21 @@ HM::s_modtable modTbl[] = {
  * Each value represents a register index defined in s_regDevL0 below
  */
 uint8_t sliceStr[] = {
-	0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12, 0x13, 0x14, 0x30
+	0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12, 0x14, 0x24, 0x25
 };
 
 /**
  * Register definition for List 0
  */
 struct s_regDevL0 {
-	// 0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12, 0x30
+	// 0x01, 0x05, 0x0A, 0x0B, 0x0C, 0x12, 0x14, 0x24, 0x25
 	uint8_t burstRx;         // 0x01,             startBit:0, bits:8
 	uint8_t             :6;  // 0x05              startBit:0, bits:6
 	uint8_t ledMode     :2;  // 0x05,             startBit:6, bits:2
 	uint8_t pairCentral[3];  // 0x0A, 0x0B, 0x0C, startBit:0, bits:8 (3 mal)
 	uint8_t lowBatLimit;     // 0x12,             startBit:0, bits:8
-	uint8_t altitude[2];     // 0x13, 0x14        startBit:0, bits:8
-	uint8_t transmitTryMax;  // 0x30,             startBit:0, bits:8
+	uint8_t transmDevTryMax; // 0x14,             startBit:0, bits:8
+	uint8_t altitude[2];     // 0x24, 0x25        startBit:0, bits:8
 };
 
 // todo
@@ -104,7 +104,7 @@ HM::s_eeprom ee[] = {
  * Definitions for EEprom defaults.
  * Must enter in same order as e.g. defined in s_regDevL0
  */
-const uint8_t regs00[] PROGMEM = {0x00, 0x64, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x03};
+const uint8_t regs00[] PROGMEM = {0x00, 0x64, 0x00, 0x00, 0x00, 0x10, 0x03, 0x00, 0x00};
 const uint8_t regs04[] PROGMEM = {0x1f, 0xa6, 0x5c, 0x05};
 
 s_defaultRegsTbl defaultRegsTbl[] = {

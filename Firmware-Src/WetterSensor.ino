@@ -50,7 +50,7 @@ void setup() {
 		BATTERY_MODE_EXTERNAL_MESSUREMENT, 7, 1, BATTERY_MEASSUREMENT_FACTOR, 10000
 	);
 
-	hm.init(RESET_MODE_HARD);													// initialize the hm module
+	hm.init();																	// initialize the hm module
 
 	button[0].regInHM(0, &hm);													// register buttons in HM per channel, handover HM class pointer
 	button[0].config(8, NULL);													// configure button on specific pin and handover a function pointer to the main sketch
@@ -97,7 +97,7 @@ void cmdReset(uint8_t *data, uint8_t len) {
 
 	hm.send_ACK();																// send an ACK
 	if (data[1] == 0) {
-		hm.reset();																// do a reset only if channel is 0
+		hm.resetWdt();
 	}
 }
 
@@ -117,10 +117,10 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 //	hm.setPowerMode(POWER_MODE_ON);
 
 	// set max transmit retry
-	uint8_t transmitTryMax = regs.ch0.l0.transmitTryMax;
-	transmitTryMax = (transmitTryMax < 1) ? 1 : transmitTryMax;
-	transmitTryMax = (transmitTryMax > 6) ? 6 : transmitTryMax;
-	dParm.maxRetr = transmitTryMax;
+	uint8_t transmDevTryMax = regs.ch0.l0.transmDevTryMax;
+	transmDevTryMax = (transmDevTryMax < 1) ? 1 : transmDevTryMax;
+	transmDevTryMax = (transmDevTryMax > 10) ? 10 : transmDevTryMax;
+	dParm.maxRetr = transmDevTryMax;
 
 	// set altitude
 	int16_t altitude = regs.ch0.l0.altitude[1] | (regs.ch0.l0.altitude[0] << 8);
@@ -133,7 +133,7 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 //		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << '\n';
 //		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << '\n';
 //		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << '\n';
-//		Serial << F("transmitTryMax: ") << transmitTryMax << '\n';
+//		Serial << F("transmDevTryMax: ") << transmDevTryMax << '\n';
 //		Serial << F("altitude: ") << altitude << '\n';
 	#endif
 }
