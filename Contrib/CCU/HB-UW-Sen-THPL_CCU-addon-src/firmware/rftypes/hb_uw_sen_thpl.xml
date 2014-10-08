@@ -2,11 +2,11 @@
 <device version="2" rx_modes="CONFIG,WAKEUP,LAZY_CONFIG" cyclic_timeout="600">
   <supported_types>
     <type name="HB-UW-Sen-THPL-I" id="HB-UW-Sen-THPL-I" updatable="true">
-      <parameter index="9.0" size="1.0" cond_op="GE" const_value="13" />
+      <parameter index="9.0" size="1.0" cond_op="GE" const_value="12" />
       <parameter index="10.0" size="2.0" const_value="0xF101" />
     </type>
     <type name="HB-UW-Sen-THPL-O" id="HB-UW-Sen-THPL-O">
-      <parameter index="9.0" size="1.0" cond_op="GE" const_value="13" />
+      <parameter index="9.0" size="1.0" cond_op="GE" const_value="12" />
       <parameter index="10.0" size="2.0" const_value="0xF102"></parameter>
     </type>
   </supported_types>
@@ -113,6 +113,9 @@
             <event frame="WEATHER_EVENT" />
           </physical>
           <conversion type="float_integer_scale" factor="10.0" />
+          <description>
+            <field id="AutoconfRoles" value="WEATHER" />
+          </description>
         </parameter>
         <parameter id="LUMINOSITY" operations="read,event">
           <logical type="float" min="0" max="65535">
