@@ -5,9 +5,9 @@
       <parameter index="9.0" size="1.0" cond_op="GE" const_value="12" />
       <parameter index="10.0" size="2.0" const_value="0xF101" />
     </type>
-    <type name="HB-UW-Sen-THPL-O" id="HB-UW-Sen-THPL-O">
+    <type name="HB-UW-Sen-THPL-O" id="HB-UW-Sen-THPL-O" updatable="true">
       <parameter index="9.0" size="1.0" cond_op="GE" const_value="12" />
-      <parameter index="10.0" size="2.0" const_value="0xF102"></parameter>
+      <parameter index="10.0" size="2.0" const_value="0xF102" />
     </type>
   </supported_types>
   <paramset type="MASTER" id="hb_uw_sen_thpl_dev_master">

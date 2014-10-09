@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <device version="1" rx_modes="CONFIG" cyclic_timeout="600">
   <supported_types>
-    <type name="HB-UW-Sen-THPL-I" id="HB-UW-Sen-THPL-I">
+    <type name="HB-UW-Sen-THPL-I" id="HB-UW-Sen-THPL-I" updatable="true">
       <parameter index="9.0" size="1.0" cond_op="LE" const_value="11" />
       <parameter index="10.0" size="2.0" const_value="0xF101" />
     </type>
-    <type name="HB-UW-Sen-THPL-O" id="HB-UW-Sen-THPL-O">
+    <type name="HB-UW-Sen-THPL-O" id="HB-UW-Sen-THPL-O" updatable="true">
       <parameter index="9.0" size="1.0" cond_op="LE" const_value="11" />
       <parameter index="10.0" size="2.0" const_value="0xF102" />
     </type>
@@ -84,7 +84,7 @@
             <event frame="WEATHER_EVENT" />
           </physical>
           <description>
-            <field id="AutoConfRoles" value="WEATHER" />
+            <field id="AutoconfRoles" value="WEATHER" />
           </description>
         </parameter>
         <parameter id="LUMINOSITY" operations="read,event">
