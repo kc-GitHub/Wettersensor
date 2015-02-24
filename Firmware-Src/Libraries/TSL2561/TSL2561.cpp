@@ -405,7 +405,7 @@ boolean TSL2561::readUInt(unsigned char address, unsigned int &value) {
  * Returns true (1) if successful, false (0) if there was an I2C error
  * (Also see getError() above)
  */
-byte TSL2561::writeUInt(unsigned char address, unsigned int value) {
+boolean TSL2561::writeUInt(unsigned char address, unsigned int value) {
 	// Split int into lower and upper bytes, write each byte
 	if (writeByte(address, lowByte(value)) && writeByte(address + 1, highByte(value))) {
 		return(true);
