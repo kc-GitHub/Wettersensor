@@ -32,6 +32,7 @@
 		devParam															// pointer to devParam, see above
 	};
 
+	//- channel device list table --------------------------------------------------------------------------------------------
 	HM::s_modtable modTbl[] = {
 		{ 0, 0, (s_mod_dlgt) NULL },										// ???
 		{ 0, 0, (s_mod_dlgt) NULL },										// ???
@@ -82,7 +83,7 @@
 	/**
 	 * channel device list table, 22 bytes
 	 */
-	s_cnlDefType cnlDefType[] PROGMEM = {
+	const s_cnlDefType cnlDefType[] PROGMEM = {
 		// cnl, lst, peersMax, sIdx, sLen, pAddr,  pPeer,  *pRegs (pointer to regs structure)
 		 { 0,   0,   0,        0x00, 9,    0x0000, 0x0000, (void*)&regs.ch0.l0},	// List 0
 		 { 1,   4,   6,        0x05, 1,    0x0005, 0x0000, (void*)&regs.ch1.l4},	// List 4

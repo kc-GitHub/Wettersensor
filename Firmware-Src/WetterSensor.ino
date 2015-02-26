@@ -97,7 +97,8 @@ void cmdReset(uint8_t *data, uint8_t len) {
 
 	hm.send_ACK();																// send an ACK
 	if (data[1] == 0) {
-		hm.resetWdt();
+		hm.reset();
+//		hm.resetWdt();
 	}
 }
 
@@ -112,8 +113,8 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 	hm.setLedMode((regs.ch0.l0.ledMode) ? LED_MODE_EVERYTIME : LED_MODE_CONFIG);
 
 	// power mode for HM device
-	hm.setPowerMode(POWER_MODE_SLEEP_WDT);
-//	hm.setPowerMode((regs.ch0.l0.burstRx) ? POWER_MODE_BURST : POWER_MODE_SLEEP_WDT);
+//	hm.setPowerMode(POWER_MODE_SLEEP_WDT);
+	hm.setPowerMode((regs.ch0.l0.burstRx) ? POWER_MODE_BURST : POWER_MODE_SLEEP_WDT);
 //	hm.setPowerMode(POWER_MODE_ON);
 
 	// set max transmit retry
