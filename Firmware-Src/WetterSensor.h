@@ -31,7 +31,7 @@
 	#define DEVICE_ADDRESS       0xAB, 0xCD, 0xEF								// The HM-ID 3 bytes, needed for pairing     (Default for flash tool)
 #endif
 
-#define BATTERY_MEASSUREMENT_FACTOR 0.164										// Faktor Spannungsteiler externe Batteriemessung
+#define BATTERY_MEASSUREMENT_FACTOR 17											// Faktor Spannungsteiler externe Batteriemessung
 #define BATTERY_MIN_VOLTAGE         10											// minimal configuable low battery voltage level
 #define BATTERY_MAX_VOLTAGE         50											// maximal configuable low battery voltage level
 
