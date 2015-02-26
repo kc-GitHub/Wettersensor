@@ -4,8 +4,6 @@
 	#include "WProgram.h"
 #endif
 
-#include <Wire.h>																// i2c library, needed for bmp085 or bmp180
-
 /**
  * Must set in AskSinMain.h to !!!
  *

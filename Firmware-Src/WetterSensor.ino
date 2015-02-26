@@ -1,6 +1,11 @@
-//- load library's --------------------------------------------------------------------------------------------------------
 #include "WetterSensor.h"
 #include "Register.h"															// configuration sheet
+
+//- load library's --------------------------------------------------------------------------------------------------------
+#include <Wire.h>																// i2c library, needed for bmp085 or bmp180
+#include <TSL2561.h>
+#include <Sensirion.h>
+#include <BMP085.h>
 #include <Buttons.h>															// remote buttons library
 #include <Sensor_SHT10_BMP085_TSL2561.h>
 
