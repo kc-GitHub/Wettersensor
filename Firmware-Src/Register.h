@@ -16,7 +16,7 @@
 			0xFF, 0xFF, 0xFF												// space for device address, assigned later
 		};
 	#else
-		const uint8_t devParam[] PROGMEM = {
+		uint8_t devParam[] = {
 			FIRMWARE_VERSION,
 			DEVICE_TYPE,
 			DEVICE_SERIAL,
