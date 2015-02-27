@@ -52,7 +52,7 @@ void setup() {
 
 	// setup battery measurement
 	hm.battery.config(
-		BATTERY_MODE_EXTERNAL_MESSUREMENT, 7, 1, BATTERY_MEASSUREMENT_FACTOR, 10000
+		BATTERY_MODE_EXTERNAL_MESSUREMENT, 7, 1, BATTERY_MEASSUREMENT_FACTOR, 900000	// battery measurement every 15 minutes
 	);
 
 	hm.init();																	// initialize the hm module
