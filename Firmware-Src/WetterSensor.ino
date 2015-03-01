@@ -35,7 +35,7 @@ void setup() {
 	#ifdef SER_DBG
 		Serial.begin(57600);													// serial setup
 		Serial << F("Starting sketch...\n");									// ...and some information
-		Serial << F("freeMem: ") << freeMem() << F(" byte") <<'\n';
+//		Serial << F("freeMem: ") << freeMem() << F(" byte") <<'\n';
 	#endif
 
 	#if USE_ADRESS_SECTION == 1
