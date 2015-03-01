@@ -7,7 +7,15 @@ For the firmware update, the Sensor must switched off and switched on again.
 
 Changelog:
 
-Version 0.13
+Version Beta 0.14
+-------------
+
+** Improvement
+ * Add new register:
+   - Fix millis() overflow bug. Now, the sensor stays in sleep mode after 49 days, so battery should not drained anymore
+   - Battery voltage now measured with 1 digit only.
+
+Version Beta 0.13
 -------------
 
 ** Improvement

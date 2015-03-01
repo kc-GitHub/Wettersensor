@@ -27,7 +27,7 @@ fullFile=$outPath/$outFile
 if [ $# -lt 3 ]
 	then
 		./hex2eq3.php --inFile ../Firmware-Src/Release/WetterSensor.hex --spmPageSize 128 --outFormat eq3 --outFile $fullFile.eq3 --withCrcCheck
-		./hex2eq3.php --inFile ../Firmware-Src/Release/WetterSensor.hex --spmPageSize 128 --outFormat hex --outFile $fullFile.hex
+		./hex2eq3.php --inFile ../Firmware-Src/Release/WetterSensor.hex --spmPageSize 128 --outFormat hex --outFile $fullFile.hex --withCrcCheck
 		cp $fullFile.eq3 ./
 
 		rm -rf ../Firmware-Release/tmp

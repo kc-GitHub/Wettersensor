@@ -29,23 +29,25 @@ Sensors_SHT10_BMP085_TSL2561 sensTHPL;
 // main functions
 void setup() {
 
+	//millis overflow test
+	//timer0_millis = 4294967295 - 666666;										// overflow reached in about 11 minutes and 7 seconds
+
 	// We disable the Watchdog first
 	wdt_disable();
 
 	#ifdef SER_DBG
 		Serial.begin(57600);													// serial setup
 		Serial << F("Starting sketch...\n");									// ...and some information
-//		Serial << F("freeMem: ") << freeMem() << F(" byte") <<'\n';
+		Serial << F("freeMem: ") << freeMem() << F(" byte") << F("\n");
 	#endif
 
 	#if USE_ADRESS_SECTION == 1
 		getDataFromAddressSection(devParam, 1,  ADDRESS_SECTION_START + 0, 12);	// get device type (model-ID) and serial number from bootloader section at 0x7FF0 and 0x7FF2
 		getDataFromAddressSection(devParam, 17, ADDRESS_SECTION_START + 12, 3);	// get device address stored in bootloader section at 0x7FFC
 
-//		Serial.begin(57600);
-//		Serial << F("Device type from Bootloader: ") << pHex(&devParam[1],  2) << '\n';
-//		Serial << F("Serial from Bootloader: ")      << pHex(&devParam[3], 10) << '\n';
-//		Serial << F("Addresse from Bootloader: ")    << pHex(&devParam[17], 3) << '\n';
+		//Serial << F("Device type from Bootloader: ") << pHex(&devParam[1],  2) << F("\n");
+		//Serial << F("Serial from Bootloader: ")      << pHex(&devParam[3], 10) << F("\n");
+		//Serial << F("Addresse from Bootloader: ")    << pHex(&devParam[17], 3) << F("\n");
 	#endif
 
 	hm.cc.config(10,11,12,13,2,0);												// CS, MOSI, MISO, SCK, GDO0, Interrupt
@@ -97,7 +99,7 @@ void loop() {
 
 void cmdReset(uint8_t *data, uint8_t len) {
 	#ifdef SER_DBG
-		Serial << F("reset, data: ") << pHex(data,len) << '\n';
+		Serial << F("reset, data: ") << pHex(data,len) << F("\n");
 	#endif
 
 	hm.send_ACK();																// send an ACK
@@ -135,12 +137,14 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 	sensTHPL.setAltitude(altitude);
 
 	#ifdef SER_DBG
-		Serial << F("config changed, data: ") << pHex(data,len) << '\n';
-//		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << '\n';
-//		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << '\n';
-//		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << '\n';
-//		Serial << F("transmDevTryMax: ") << transmDevTryMax << '\n';
-//		Serial << F("altitude: ") << altitude << '\n';
+		Serial << F("Config changed.") << F("\n");
+		if (len > 0) Serial << F("Data: ") << pHex(data,len) << F("\n");
+
+		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << F("\n");
+		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << F("\n");
+		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << F("\n");
+		Serial << F("transmDevTryMax: ") << transmDevTryMax << F("\n");
+		Serial << F("altitude: ") << altitude << F("\n");
 	#endif
 }
 
