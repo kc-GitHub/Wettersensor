@@ -1,7 +1,6 @@
 Firmware for Univarsal Wettersensor
 ===================================
 
-@See
 * http://www.fhemwiki.de/wiki/Universalsensor
 * http://forum.fhem.de/index.php/topic,20620.0.html
 
