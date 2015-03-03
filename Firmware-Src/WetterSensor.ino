@@ -45,9 +45,9 @@ void setup() {
 		getDataFromAddressSection(devParam, 1,  ADDRESS_SECTION_START + 0, 12);	// get device type (model-ID) and serial number from bootloader section at 0x7FF0 and 0x7FF2
 		getDataFromAddressSection(devParam, 17, ADDRESS_SECTION_START + 12, 3);	// get device address stored in bootloader section at 0x7FFC
 
-		//Serial << F("Device type from Bootloader: ") << pHex(&devParam[1],  2) << F("\n");
-		//Serial << F("Serial from Bootloader: ")      << pHex(&devParam[3], 10) << F("\n");
-		//Serial << F("Addresse from Bootloader: ")    << pHex(&devParam[17], 3) << F("\n");
+		//Serial << F("Device type from Bootloader: "); pHex(&devParam[1],  2, SERIAL_DBG_PHEX_MODE_LF);
+		//Serial << F("Serial from Bootloader: ")     ; pHex(&devParam[3], 10, SERIAL_DBG_PHEX_MODE_LF);
+		//Serial << F("Addresse from Bootloader: ")   ; pHex(&devParam[17], 3, SERIAL_DBG_PHEX_MODE_LF);
 	#endif
 
 	hm.cc.config(10,11,12,13,2,0);												// CS, MOSI, MISO, SCK, GDO0, Interrupt
@@ -99,7 +99,7 @@ void loop() {
 
 void cmdReset(uint8_t *data, uint8_t len) {
 	#ifdef SER_DBG
-		Serial << F("reset, data: ") << pHex(data,len) << F("\n");
+		Serial << F("reset, data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LF);
 	#endif
 
 	hm.send_ACK();																// send an ACK
@@ -137,9 +137,7 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 	sensTHPL.setAltitude(altitude);
 
 	#ifdef SER_DBG
-		Serial << F("Config changed.") << F("\n");
-		if (len > 0) Serial << F("Data: ") << pHex(data,len) << F("\n");
-
+		Serial << F("Config changed. Data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LF);
 		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << F("\n");
 		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << F("\n");
 		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << F("\n");
@@ -149,10 +147,10 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 }
 
 void cmdStatusRequest(uint8_t *data, uint8_t len) {
-	Serial << F("status request, data: ") << pHex(data,len) << '\n';
+	Serial << F("status request, data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LF);
 	_delay_ms(50);
 }
 
 void HM_Remote_Event(uint8_t *data, uint8_t len) {
-	Serial << F("remote event, data: ") << pHex(data,len) << '\n';
+	Serial << F("remote event, data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LF);
 }
