@@ -137,7 +137,7 @@ void cmdConfigChanged(uint8_t *data, uint8_t len) {
 	sensTHPL.setAltitude(altitude);
 
 	#ifdef SER_DBG
-		Serial << F("Config changed. Data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LF);
+		Serial << F("Config changed. Data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LEN | SERIAL_DBG_PHEX_MODE_LF);
 		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << F("\n");
 		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << F("\n");
 		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << F("\n");
