@@ -6,7 +6,7 @@ Firmware for Univarsal Wettersensor
 
 #Changelog#
 
-##Version Beta 0.15 (Development)##
+##Version 0.15 (Development)##
  * Improve / Fix debugging.
  * Fix [#16](/../../issues/16) so pairing with HM-CC-RT-DN should stable now.
  * Add hysteresis for battery voltage measurement.
