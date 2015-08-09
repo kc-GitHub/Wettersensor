@@ -6,7 +6,7 @@ Firmware for Univarsal Wettersensor
 
 #Changelog#
 
-##Version Beta 0.15 (Develpopment)##
+##Version Beta 0.15 (Development)##
 Improve / Fix debugging
 Fixed #16: Pairing with thermostat is stable now
 
