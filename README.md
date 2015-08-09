@@ -7,8 +7,8 @@ Firmware for Univarsal Wettersensor
 #Changelog#
 
 ##Version Beta 0.15 (Development)##
-Improve / Fix debugging
-Fixed #16: Pairing with thermostat is stable now
+ Improve / Fix debugging
+ Fix #16: Pairing with thermostat is stable now
 
 ##Version Beta 0.14##
  * Fix millis() overflow bug. Now, the sensor stays in sleep mode after 49 days, so battery should not drained anymore
