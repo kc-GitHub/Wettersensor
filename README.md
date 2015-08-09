@@ -11,7 +11,7 @@ Firmware for Univarsal Wettersensor
  * Fix [#16](/../../issues/16) so pairing with HM-CC-RT-DN should stable now.
  * Add hysteresis for battery voltage measurement.
 
-##Version Beta 0.14##
+##Version 0.14##
  * Fix millis() overflow bug. Now, the sensor stays in sleep mode after 49 days, so battery should not drained anymore
  * Battery voltage now measured with 1 digit only.
 
