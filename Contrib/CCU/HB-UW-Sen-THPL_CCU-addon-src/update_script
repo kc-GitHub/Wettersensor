@@ -1,17 +1,21 @@
 #!/bin/sh
 
 ### Prepare filesystem
-mountPath="/mnt-root"
-mkdir -p $mountPath
+mountPathRoot="/mnt-root"
+mountPathUser="/mnt-user"
+mkdir -p $mountPathRoot
+mkdir -p $mountPathUser
 
 if ["$1" == ""]; then
 	echo "CCU1"
-	mount -t yaffs /dev/mtdblock2 $mountPath
+	mount -t yaffs /dev/mtdblock2 $mountPathRoot
+	mount -t yaffs /dev/mtdblock3 $mountPathUser
 	lcdtool "Installing new device"
 	lcdtool -a 0x40 -t bin 00
 else
 	echo "CCU2"
-	mount -t ubifs ubi0:root $mountPath
+	mount -t ubifs ubi0:root $mountPathRoot
+	mount -t ubifs ubi1:user $mountPathUser
 fi
 
 ###########################
@@ -20,13 +24,13 @@ fi
 device="HB-UW-Sen-THPL"
 
 ### Copy new devices Files ###
-cp -a ./firmware/rftypes/* $mountPath/firmware/rftypes/
+cp -a ./firmware/rftypes/* $mountPathRoot/firmware/rftypes/
 
 ### Copy new images ###
-cp -ar ./www/config/img/devices $mountPath/www/config/img/
+cp -ar ./www/config/img/devices $mountPathRoot/www/config/img/
 
 ### Edit DEVDB.tcl ###
-devdescrFile="$mountPath/www/config/devdescr/DEVDB.tcl"
+devdescrFile="$mountPathRoot/www/config/devdescr/DEVDB.tcl"
 devdescrSearch="array[[:space:]]*set[[:space:]]*DEV_PATHS[[:space:]]*{"
 
 devdescrInsert=""
@@ -40,7 +44,7 @@ if [ -z $devdescrModifyed ]; then
 fi
 
 ### Edit webui.js ###
-webuiFile="$mountPath/www/webui/webui.js"
+webuiFile="$mountPathRoot/www/webui/webui.js"
 webuiSearch="DEV_HIGHLIGHT[[:space:]]*=[[:space:]]*new Array();"
 
 webuiInsert="\n"
@@ -60,11 +64,14 @@ webuiInsert="$webuiInsert DEV_PATHS['HB-UW-Sen-THPL-O']['250'] = '\/config\/img\
 
 webuiModifyed=`cat $webuiFile | grep "$device"`
 if [ -z $webuiModifyed ]; then
-	cp -a $webuiFile $webuiFile.save
-	sed -i "s/\($webuiSearch\)/\1$webuiInsert/g" $webuiFile
+	# Space on filesystem off CCU1 is short, so we copy the file to tempfs before editing
+	cp $webuiFile $mountPathUser/webui.js
+	sed -i "s/\($webuiSearch\)/\1$webuiInsert/g" $mountPathUser/webui.js
+	mv $mountPathUser/webui.js $webuiFile
 fi
 
-umount $mountPath
+umount $mountPathRoot
+umount $mountPathUser
 if ["$1" == ""]; then
 	echo "CCU1"
 	lcdtool "Reboot...             "
