@@ -45,9 +45,13 @@ void setup() {
 		getDataFromAddressSection(devParam, 1,  ADDRESS_SECTION_START + 0, 12);	// get device type (model-ID) and serial number from bootloader section at 0x7FF0 and 0x7FF2
 		getDataFromAddressSection(devParam, 17, ADDRESS_SECTION_START + 12, 3);	// get device address stored in bootloader section at 0x7FFC
 
-		//Serial << F("Device type from Bootloader: "); pHex(&devParam[1],  2, SERIAL_DBG_PHEX_MODE_LF);
-		//Serial << F("Serial from Bootloader: ")     ; pHex(&devParam[3], 10, SERIAL_DBG_PHEX_MODE_LF);
-		//Serial << F("Addresse from Bootloader: ")   ; pHex(&devParam[17], 3, SERIAL_DBG_PHEX_MODE_LF);
+		Serial << F("Device type from Bootloader: "); pHex(&devParam[1],  2, SERIAL_DBG_PHEX_MODE_LF);
+		Serial << F("Serial from Bootloader: ")     ; pHex(&devParam[3], 10, SERIAL_DBG_PHEX_MODE_LF);
+		Serial << F("Addresse from Bootloader: ")   ; pHex(&devParam[17], 3, SERIAL_DBG_PHEX_MODE_LF);
+	#else
+		Serial << F("Device type from PROGMEM: "); pHex(&devParam[1],  2, SERIAL_DBG_PHEX_MODE_LF);
+		Serial << F("Serial from PROGMEM: ")     ; pHex(&devParam[3], 10, SERIAL_DBG_PHEX_MODE_LF);
+		Serial << F("Addresse from PROGMEM: ")   ; pHex(&devParam[17], 3, SERIAL_DBG_PHEX_MODE_LF);
 	#endif
 
 	hm.cc.config(10,11,12,13,2,0);												// CS, MOSI, MISO, SCK, GDO0, Interrupt
@@ -74,11 +78,20 @@ void setup() {
 	hm.statusLed.config(4, 4);													// configure the status led pin
 	hm.statusLed.set(STATUSLED_BOTH, STATUSLED_MODE_BLINKFAST, 3);
 
-	/** Debug start */
-//	pinMode(5, OUTPUT);
-//	pinMode(6, OUTPUT);
-//	digitalWrite(5, 1);
-	/** Debug end */
+	#ifdef US_100
+		// Initialize Pins for US-100 Ultrasonic distance sensor
+		pinMode(US_100_PIN_VCC,      OUTPUT);
+		digitalWrite(US_100_PIN_VCC, LOW);										// US-100 Power (off)
+
+		pinMode(US_100_PIN_TRIGGER,      OUTPUT);
+		digitalWrite(US_100_PIN_TRIGGER, LOW);									// US-100 Trigger (off)
+
+		pinMode(US_100_PIN_ECHO, INPUT);										// US-100 Echo as input pin
+
+		pinMode(US_100_PIN_GND,       OUTPUT);
+		digitalWrite(US_100_PIN_GND,  LOW);										// US-100 Power-GND (must be off every time)
+	#endif
+
 }
 
 void getDataFromAddressSection(uint8_t *buffer, uint8_t bufferStartAddress, uint16_t sectionAddress, uint8_t dataLen) {
