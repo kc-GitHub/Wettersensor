@@ -8,8 +8,9 @@ Firmware for Univarsal Wettersensor
 
 ##Version 0.15 (Development)##
  * Improve / Fix debugging.
- * Fix [#16](/../../issues/16) so pairing with HM-CC-RT-DN should stable now.
+ * Fix [#16](/../../issues/16) so peering with HM-CC-RT-DN should stable now.
  * Add hysteresis for battery voltage measurement.
+ * Experimental support for US-100 ultrasonic distance sensor (Do not use this experimental feature if you need the peering with HM-CC-RT-DN at this time)
 
 ##Version 0.14##
  * Fix millis() overflow bug. Now, the sensor stays in sleep mode after 49 days, so battery should not drained anymore
