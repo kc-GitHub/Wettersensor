@@ -58,7 +58,11 @@ void setup() {
 
 	// setup battery measurement
 	hm.battery.config(
-		BATTERY_MODE_EXTERNAL_MESSUREMENT, 7, 1, BATTERY_MEASSUREMENT_FACTOR, 900000	// battery measurement every 15 minutes
+		BATTERY_MODE_EXTERNAL_MESSUREMENT,
+		BATTERY_MEASSUREMENT_ENABLE_PIN,
+		BATTERY_MEASSUREMENT_PIN,
+		BATTERY_MEASSUREMENT_FACTOR,
+		900000																	// battery measurement every 15 minutes
 	);
 
 	hm.init();																	// initialize the hm module
@@ -91,6 +95,14 @@ void setup() {
 		pinMode(US_100_PIN_GND,       OUTPUT);
 		digitalWrite(US_100_PIN_GND,  LOW);										// US-100 Power-GND (must be off every time)
 	#endif
+
+#ifdef ADC_MEAESURE
+	pinMode(ADC_PIN_EXT_VCC,      OUTPUT);
+	digitalWrite(ADC_PIN_EXT_VCC, LOW);											// power off external hardware
+
+	pinMode(ADC_PIN,      INPUT);
+	digitalWrite(ADC_PIN, LOW);													// Pullup off
+#endif
 
 }
 
