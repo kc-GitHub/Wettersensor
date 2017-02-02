@@ -49,7 +49,7 @@ void setup() {
 	pci_ptr = &pci_callback;
 	sei();																			// enable interrupts
 
-//	DBG(SER, F("Ready.\n\n"));
+	DBG(SER, F("Ready.\n\n"));
 
 	#ifndef SER_DBG
 		Serial.flush();
@@ -57,6 +57,9 @@ void setup() {
 	#endif
 
 	// - user related -----------------------------------------
+
+	// load register data
+	infoConfigChangeChannel0();
 }
 
 void loop() {
