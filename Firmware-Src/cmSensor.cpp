@@ -106,8 +106,8 @@ void CM_SENSOR::cm_poll(void) {
 		this->nextAction = SENSOR_ACTION_TRANSMIT;
 
 	} else if (this->nextAction == SENSOR_ACTION_TRANSMIT) {
-//		uint32_t nextSensorTime = (calcSendSlot() * 250);
-		uint32_t nextSensorTime = 10000;
+		uint32_t nextSensorTime = (calcSendSlot() * 250);
+//		uint32_t nextSensorTime = 10000;
 
 		this->sensorTimer.set(nextSensorTime - SENSOR_MAX_MEASURE_TIME);			// set a new measurement time
 		this->transmittData();
