@@ -138,7 +138,7 @@
 	);
 
 	// set default power mode
-	POM *pom = new POM(POWER_MODE_NO_SLEEP);
+	POM *pom = new POM(POWER_MODE_WAKEUP_250MS);
 
     /**
      * Regular start function
