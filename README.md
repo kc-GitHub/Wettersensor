@@ -1,10 +1,13 @@
-Firmware for Univarsal Wettersensor
+Firmware for Univarsal Wettersensor (Neue Firmware based on the current new version of NewsAskSin Lib)
 ===================================
 
 * http://www.fhemwiki.de/wiki/Universalsensor
 * http://forum.fhem.de/index.php/topic,20620.0.html
 
 #Changelog#
+
+##Version 1.0 (Development)##
+ * Rewritten code based on NewsAskSin
 
 ##Version 0.15 (Development)##
  * Improve / Fix debugging.

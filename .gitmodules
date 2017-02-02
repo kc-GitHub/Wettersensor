@@ -1,3 +1,6 @@
 [submodule "Firmware-Src/Libraries/AskSin"]
 	path = Firmware-Src/Libraries/AskSin
 	url = git@github.com:kc-GitHub/AskSin.git
+[submodule "Firmware-Src/Libraries/NewAskSin"]
+	path = Firmware-Src/Libraries/NewAskSin
+	url = git@github.com:kc-GitHub/NewAskSin.git

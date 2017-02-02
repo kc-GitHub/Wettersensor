@@ -1,181 +1,158 @@
-#include "WetterSensor.h"
-#include "Register.h"															// configuration sheet
+// load AskSin related library's
+#include <Arduino.h>
+#include <newasksin.h>																// ask sin framework
+#include <avr/wdt.h>
+#include <00_debug-flag.h>
 
-//- load library's --------------------------------------------------------------------------------------------------------
-#include <Wire.h>																// i2c library, needed for bmp085 or bmp180
-#include <TSL2561.h>
-#include <Sensirion.h>
-#include <BMP085.h>
-#include <Buttons.h>															// remote buttons library
-#include <Sensor_SHT10_BMP085_TSL2561.h>
+#include "cmSensor.h"
+#include "register.h"																// configuration sheet
 
-// homematic communication
-HM::s_jumptable jTbl[] = {														// jump table for HM communication
-	// byte3, byte10, byte11, function to call									// 0xff means - any byte
-	 { 0x11,  0x04,  0x00,    cmdReset },										// Reset message
-	 { 0x01,  0xFF,  0x06,    cmdConfigChanged },								// Config end message
-	 { 0x01,  0xFF,  0x0E,    cmdStatusRequest },
-	 { 0x00 }
-};
+#define SER_DBG
 
-Buttons button[1];																// declare remote button object
-
-Sensirion sht10;
-BMP085 bmp085;
-TSL2561 tsl2561;
-
-Sensors_SHT10_BMP085_TSL2561 sensTHPL;
-
-// main functions
+//- arduino functions -----------------------------------------------------------------------------------------------------
 void setup() {
+	// - Hardware setup ---------------------------------------
+	// - everything off ---------------------------------------
+	wdt_disable();																	// clear WDRF to avoid endless resets after WDT reset
+	MCUSR &= ~(1<<WDRF);															// stop all WDT activities
+	WDTCSR |= (1<<WDCE) | (1<<WDE);
+	WDTCSR = 0x00;
+	EIMSK = 0;																		// disable external interrupts
+	ADCSRA = 0;																		// ADC off
 
-	//millis overflow test
-	//timer0_millis = 4294967295 - 666666;										// overflow reached in about 11 minutes and 7 seconds
+	// ToDo: we must activate twi only
+//	power_all_disable();															// and everything else
+	
+	// Say hello over UART
+	DBG_START(SER, F("Starting sketch for HB-UW-Sen-THPL (" __DATE__ " " __TIME__ ")\n"));
+	DBG(SER, F(LIB_VERSION_STRING), F("\n"));
 
-	// We disable the Watchdog first
-	wdt_disable();
-
-	#ifdef SER_DBG
-		Serial.begin(57600);													// serial setup
-		Serial << F("Starting sketch...\n");									// ...and some information
-		Serial << F("freeMem: ") << freeMem() << F(" byte") << F("\n");
-	#endif
+	// - AskSin related ---------------------------------------
+	init_millis_timer2();															// init timer2
+	hm->init();																		// init the asksin framework
 
 	#if USE_ADRESS_SECTION == 1
-		getDataFromAddressSection(devParam, 1,  ADDRESS_SECTION_START + 0, 12);	// get device type (model-ID) and serial number from bootloader section at 0x7FF0 and 0x7FF2
-		getDataFromAddressSection(devParam, 17, ADDRESS_SECTION_START + 12, 3);	// get device address stored in bootloader section at 0x7FFC
+		getDataFromAddressSection(HMSerialData, 0, ADDRESS_SECTION_START + 12, 3);	// get hmid from bootloader section
+		getDataFromAddressSection(HMSerialData, 3, ADDRESS_SECTION_START + 2, 10);	// get serial number from bootloader section
+		getDataFromAddressSection(dev_static,   1, ADDRESS_SECTION_START + 0, 2);	// get device type from bootloader section
 
-		Serial << F("Device type from Bootloader: "); pHex(&devParam[1],  2, SERIAL_DBG_PHEX_MODE_LF);
-		Serial << F("Serial from Bootloader: ")     ; pHex(&devParam[3], 10, SERIAL_DBG_PHEX_MODE_LF);
-		Serial << F("Addresse from Bootloader: ")   ; pHex(&devParam[17], 3, SERIAL_DBG_PHEX_MODE_LF);
-	#else
-		Serial << F("Device type from PROGMEM: "); pHex(&devParam[1],  2, SERIAL_DBG_PHEX_MODE_LF);
-		Serial << F("Serial from PROGMEM: ")     ; pHex(&devParam[3], 10, SERIAL_DBG_PHEX_MODE_LF);
-		Serial << F("Addresse from PROGMEM: ")   ; pHex(&devParam[17], 3, SERIAL_DBG_PHEX_MODE_LF);
+		// we must copy HMSerialData to dev_ident every time at start
+		memcpy(((uint8_t*)&dev_ident) + 2, HMSerialData, sizeof(dev_ident) - 2);
+
+		#ifdef SER_DBG
+			DBG(SER, F("\nGet HMID and HMSR from Bootloader-Area\n"));
+			DBG(SER, F("SerialData: "), _HEX(HMSerialData,13), F("\n"));
+			DBG(SER, F("Master-ID: "), _HEX(dev_operate.MAID,3), F("\n\n"));
+		#endif
 	#endif
 
-	hm.cc.config(10,11,12,13,2,0);												// CS, MOSI, MISO, SCK, GDO0, Interrupt
+	pci_ptr = &pci_callback;
+	sei();																			// enable interrupts
 
-	// setup battery measurement
-	hm.battery.config(
-		BATTERY_MODE_EXTERNAL_MESSUREMENT,
-		BATTERY_MEASSUREMENT_ENABLE_PIN,
-		BATTERY_MEASSUREMENT_PIN,
-		BATTERY_MEASSUREMENT_FACTOR,
-		900000																	// battery measurement every 15 minutes
-	);
+//	DBG(SER, F("Ready.\n\n"));
 
-	hm.init();																	// initialize the hm module
-
-	button[0].regInHM(0, &hm);													// register buttons in HM per channel, handover HM class pointer
-	button[0].config(8, NULL);													// configure button on specific pin and handover a function pointer to the main sketch
-
-	sensTHPL.regInHM(1, &hm);													// register sensor class in hm
-	sensTHPL.config(A4, A5, 0, &sht10, &bmp085, &tsl2561);						// data pin, clock pin and timing - 0 means HM calculated timing, every number above will taken in milliseconds
-
-	byte rr = MCUSR;
-	MCUSR =0;
-
-	cmdConfigChanged(0, 0);
-
-	// initialization done, we blink 3 times
-	hm.statusLed.config(4, 4);													// configure the status led pin
-	hm.statusLed.set(STATUSLED_BOTH, STATUSLED_MODE_BLINKFAST, 3);
-
-	#ifdef US_100
-		// Initialize Pins for US-100 Ultrasonic distance sensor
-		pinMode(US_100_PIN_VCC,      OUTPUT);
-		digitalWrite(US_100_PIN_VCC, LOW);										// US-100 Power (off)
-
-		pinMode(US_100_PIN_TRIGGER,      OUTPUT);
-		digitalWrite(US_100_PIN_TRIGGER, LOW);									// US-100 Trigger (off)
-
-		pinMode(US_100_PIN_ECHO, INPUT);										// US-100 Echo as input pin
-
-		pinMode(US_100_PIN_GND,       OUTPUT);
-		digitalWrite(US_100_PIN_GND,  LOW);										// US-100 Power-GND (must be off every time)
+	#ifndef SER_DBG
+		Serial.flush();
+		power_usart0_disable();
 	#endif
 
-#ifdef ADC_MEAESURE
-	pinMode(ADC_PIN_EXT_VCC,      OUTPUT);
-	digitalWrite(ADC_PIN_EXT_VCC, LOW);											// power off external hardware
-
-	pinMode(ADC_PIN,      INPUT);
-	digitalWrite(ADC_PIN, LOW);													// Pullup off
-#endif
-
-}
-
-void getDataFromAddressSection(uint8_t *buffer, uint8_t bufferStartAddress, uint16_t sectionAddress, uint8_t dataLen) {
-	for (unsigned char i = 0; i < dataLen; i++) {
-		buffer[(i + bufferStartAddress)] = pgm_read_byte(sectionAddress + i);
-	}
-}
-
-void getPgmSpaceData(uint8_t *buffer, uint16_t address, uint8_t len) {
-	for (unsigned char i = 0; i < len; i++) {
-		buffer[i] = pgm_read_byte(address+i);
-	}
+	// - user related -----------------------------------------
 }
 
 void loop() {
-	hm.poll();																	// poll the HM communication
+	// AskSin related
+	hm->poll();																		// poll the homematic main loop
+
+//	#ifdef SER_DBG
+//		serialEvent();
+//	#endif
 }
 
-void cmdReset(uint8_t *data, uint8_t len) {
-	#ifdef SER_DBG
-		Serial << F("reset, data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LF);
-	#endif
+//- user functions --------------------------------------------------------------------------------------------------------
 
-	hm.send_ACK();																// send an ACK
-	if (data[1] == 0) {
-		hm.reset();
-//		hm.resetWdt();
-	}
-}
-
-void cmdConfigChanged(uint8_t *data, uint8_t len) {
-	// low battery level
-	uint8_t lowBatVoltage = regs.ch0.l0.lowBatLimit;
+void infoConfigChangeChannel0() {
+	// configure low battery level
+	uint8_t lowBatVoltage = *cmm[0]->list[0]->ptr_to_val(REG_CHN0_LOW_BAT_LIMIT_TH);
 	lowBatVoltage = (lowBatVoltage < BATTERY_MIN_VOLTAGE) ? BATTERY_MIN_VOLTAGE : lowBatVoltage;
 	lowBatVoltage = (lowBatVoltage > BATTERY_MAX_VOLTAGE) ? BATTERY_MAX_VOLTAGE : lowBatVoltage;
-	hm.battery.setMinVoltage(lowBatVoltage);
+	// set lowBat threshold
+	bat->set(BATTERY_CHECK_INTERVAL, lowBatVoltage);
 
-	// led mode
-	hm.setLedMode((regs.ch0.l0.ledMode) ? LED_MODE_EVERYTIME : LED_MODE_CONFIG);
+	// enable / disable LED depend on register
+	uint8_t ledMode = (*cmm[0]->list[0]->ptr_to_val(REG_CHN0_LED_MODE) & 0x40);
+	led->setIgnoreSendPattern( !ledMode );
 
-	// power mode for HM device
-//	hm.setPowerMode(POWER_MODE_SLEEP_WDT);
-	hm.setPowerMode((regs.ch0.l0.burstRx) ? POWER_MODE_BURST : POWER_MODE_SLEEP_WDT);
-//	hm.setPowerMode(POWER_MODE_ON);
+	// if burstRx is set ...
+	if (*cmm[0]->list[0]->ptr_to_val(REG_CHN0_BURST_RX)) {
+		pom->setMode(POWER_MODE_WAKEUP_ONRADIO);									// set mode to wakeup on burst
+	} else {	// no burstRx wanted
+		pom->setMode(POWER_MODE_WAKEUP_250MS);										// set mode to awake every 250 msecs
+	}
 
 	// set max transmit retry
-	uint8_t transmDevTryMax = regs.ch0.l0.transmDevTryMax;
+	uint8_t transmDevTryMax = *cmm[0]->list[0]->ptr_to_val(REG_CHN0_TRANS_DEV_TRY_MAX);
 	transmDevTryMax = (transmDevTryMax < 1) ? 1 : transmDevTryMax;
 	transmDevTryMax = (transmDevTryMax > 10) ? 10 : transmDevTryMax;
-	dParm.maxRetr = transmDevTryMax;
+	snd_msg.max_retr = transmDevTryMax;
 
 	// set altitude
-	int16_t altitude = regs.ch0.l0.altitude[1] | (regs.ch0.l0.altitude[0] << 8);
-	altitude = (altitude < -500) ? -500 : altitude;
-	altitude = (altitude > 10000) ? 10000 : altitude;
-	sensTHPL.setAltitude(altitude);
+	int16_t regChnl0Altitude = *cmm[0]->list[0]->ptr_to_val(REG_CHN0_ALTITUDE1) | (*cmm[0]->list[0]->ptr_to_val(REG_CHN0_ALTITUDE0) << 8);
+	regChnl0Altitude = (regChnl0Altitude < -500) ? -500 : regChnl0Altitude;
+	regChnl0Altitude = (regChnl0Altitude > 10000) ? 10000 : regChnl0Altitude;
 
 	#ifdef SER_DBG
-		Serial << F("Config changed. Data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LEN | SERIAL_DBG_PHEX_MODE_LF);
-		Serial << F("lowBatLimit: ") << regs.ch0.l0.lowBatLimit << F("\n");
-		Serial << F("ledMode: ") << regs.ch0.l0.ledMode << F("\n");
-		Serial << F("burstRx: ") << regs.ch0.l0.burstRx << F("\n");
-		Serial << F("transmDevTryMax: ") << transmDevTryMax << F("\n");
-		Serial << F("altitude: ") << altitude << F("\n");
+		DBG(SER, F("lowBat: "), lowBatVoltage, F("\n"));
+		DBG(SER, F("led: "), ledMode, F("\n"));
+		DBG(SER, F("bRx: "), *cmm[0]->list[0]->ptr_to_val(REG_CHN0_BURST_RX), F("\n"));
+		DBG(SER, F("transTryMax: "), transmDevTryMax, F("\n"));
+		DBG(SER, F("alt: "), regChnl0Altitude, F("\n"));
 	#endif
 }
 
-void cmdStatusRequest(uint8_t *data, uint8_t len) {
-	Serial << F("status request, data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LF);
-	_delay_ms(50);
+#if USE_ADRESS_SECTION == 1
+	void getDataFromAddressSection(uint8_t *buffer, uint8_t bufferStartAddress, uint16_t sectionAddress, uint8_t dataLen) {
+		for (unsigned char i = 0; i < dataLen; i++) {
+			buffer[(i + bufferStartAddress)] = pgm_read_byte(sectionAddress + i);
+		}
+	}
+#endif
+
+uint16_t getAdcValue(uint8_t admux) {
+	uint32_t adcValue = 0;
+
+	ADMUX = (admux);
+	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);							// Enable ADC and set ADC prescaler
+
+	for(int i = 0; i < ADC_MEASURE_COUNT + ADC_MEASURE_DUMMY_COUNT; i++) {
+		ADCSRA |= (1 << ADSC);													// start conversion
+		while (ADCSRA & (1 << ADSC)) {}											// wait for conversion complete
+
+		if (i >= ADC_MEASURE_DUMMY_COUNT) {										// we discard the first dummy measurements
+			adcValue += ADCW;
+		}
+	}
+
+	ADCSRA &= ~(1 << ADEN);														// ADC disable
+
+	adcValue = adcValue / ADC_MEASURE_COUNT;
+
+	return (uint16_t)adcValue;
 }
 
-void HM_Remote_Event(uint8_t *data, uint8_t len) {
-	Serial << F("remote event, data: "); pHex(data,len, SERIAL_DBG_PHEX_MODE_LF);
+/**
+ * pcInt callback funktion
+ *
+ * @brief this is the registered callback function for the pin change interrupt.
+ * there are 3 parameters as a hand over to identify the pin which has raised the interrupt and if it was a falling or raising edge.
+ * <vec> returns the port which had raised the interrupt.
+ * <pin> is the byte value of the pin which has raised the interrupt. 1 = pin0, 2 = pin1, 4 = pin2, 8 = pin3, 16 = pin4, etc...
+ * <flag> to indentify a falling or raising edge. 0 = falling, value above 0 = raising
+ */
+void pci_callback(uint8_t vec, uint8_t pin, uint8_t flag) {
+	// Check PC-INT for PortC, Pin0 Falling Edge (TSL2561 conversion complete)
+	if (vec == 1 && flag == 0) {
+		tsl2561_pciFlag = 1;
+	}
+
+//	DBG(SER, F("v:"), vec, F(", p:"), pin, F(", f:"), flag, F("\n"));
 }

@@ -1,0 +1,10 @@
+.settings
+.project
+.cproject
+/.project
+/.vs
+/Arduino
+/Debug
+/Release
+/ZZ
+/HowTo use Atmel Studio with Arduino.odt
