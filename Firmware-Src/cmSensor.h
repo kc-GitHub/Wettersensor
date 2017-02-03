@@ -26,7 +26,7 @@
 	#define SENSOR_ACTION_TRANSMIT_WAIT         5
 	#define SENSOR_ACTION_TRANSMIT              6
 
-	#define SENSOR_MAX_MEASURE_TIME           750								// maximum expected time which sensors needed for collecting data
+	#define SENSOR_MAX_MEASURE_TIME           1500								// maximum expected time which sensors needed for collecting data
 	#define SENSOR_STATUS_LIGHT_MISSING       6553800
 	#define SENSOR_STATUS_LIGHT_ERROR         6553700
 
@@ -52,6 +52,7 @@
 			unsigned int tsl2561Data1;
 			waitTimer    sensorTimer;											// delay timer for sensor
 			uint32_t     milliMeasureStart;										// save millis at start sensor reading
+			uint32_t     timerRemain;											// timer remain, if data transmission start manual
 
 			Sensirion    sht10;
 			BMP085       bmp180;
