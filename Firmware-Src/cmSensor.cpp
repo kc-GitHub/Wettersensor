@@ -73,7 +73,7 @@ void CM_SENSOR::cm_poll(void) {
 
 	if (this->nextAction == SENSOR_ACTION_MEASURE_INIT) {							// 0: initialize sensors if needed
 		this->sht10Init();															// initialize the SHT10
-		this->tsl2561Init();														// initialize the tsl2561
+		this->tsl2561Init();														// initialize the TSL2561
 		this->nextAction = SENSOR_ACTION_MEASURE_START_WAIT;						// initialize done we can activate measuring
 
 	} else if (this->nextAction == SENSOR_ACTION_MEASURE_START_WAIT) {				// 1: start measuring
@@ -108,7 +108,7 @@ void CM_SENSOR::cm_poll(void) {
 		this->nextAction = SENSOR_ACTION_TRANSMIT;
 
 	} else if (this->nextAction == SENSOR_ACTION_TRANSMIT) {						// 6: send data
-		uint32_t nextSensorTime = (calcSendSlot() * 250);
+		uint32_t nextSensorTime = (calcSendSlot() * 250) + 1000;
 //		uint32_t nextSensorTime = 10000;
 
 		this->sensorTimer.set(nextSensorTime - SENSOR_MAX_MEASURE_TIME);			// set a new measurement time
@@ -150,7 +150,7 @@ void CM_SENSOR::set_toggle(void) {
 /**
  * @brief Calculate the next send slot
  */
-uint32_t CM_SENSOR::calcSendSlot(void) {
+inline uint32_t CM_SENSOR::calcSendSlot(void) {
 	uint8_t hmId[4];
 	hmId[0] = dev_ident.HMID[2];
 	hmId[1] = dev_ident.HMID[1];
@@ -158,7 +158,7 @@ uint32_t CM_SENSOR::calcSendSlot(void) {
 	hmId[3] = 0;
 
 	uint32_t result = ((( *(uint32_t*)&hmId << 8) | (snd_msg.mBody.MSG_CNT)) * 1103515245 + 12345) >> 16;
-	result = (result & 0xFF);
+	result = (result & 0xFF) + 480;
 
 	return result;
 }

@@ -57,7 +57,7 @@
 			BMP085       bmp180;
 			TSL2561      tsl2561;
 
-			uint32_t calcSendSlot(void);
+			inline uint32_t calcSendSlot(void);
 
 		public:  //----------------------------------------------------------------------------------------------------------------
 			struct s_sensorValues
