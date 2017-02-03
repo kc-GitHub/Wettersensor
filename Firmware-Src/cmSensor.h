@@ -18,12 +18,13 @@
 	const uint8_t cm_thsensor_PeerReg[] PROGMEM = { 0x01,0x02, };
 	const uint8_t cm_thsensor_PeerDef[] PROGMEM = { 0x00,0x00, };
 
-	#define SENSOR_ACTION_MEASURE_START_WAIT  1
-	#define SENSOR_ACTION_MEASURE_LIGHT_WAIT  2
-	#define SENSOR_ACTION_MEASURE_LIGHT_READ  3
-	#define SENSOR_ACTION_MEASURE_THP_READ    4
-	#define SENSOR_ACTION_TRANSMIT_WAIT       5
-	#define SENSOR_ACTION_TRANSMIT            6
+	#define SENSOR_ACTION_MEASURE_INIT          0
+	#define SENSOR_ACTION_MEASURE_START_WAIT    1
+	#define SENSOR_ACTION_MEASURE_LIGHT_TIMEOUT 2
+	#define SENSOR_ACTION_MEASURE_LIGHT_READ    3
+	#define SENSOR_ACTION_MEASURE_THP_READ      4
+	#define SENSOR_ACTION_TRANSMIT_WAIT         5
+	#define SENSOR_ACTION_TRANSMIT              6
 
 	#define SENSOR_MAX_MEASURE_TIME           750								// maximum expected time which sensors needed for collecting data
 	#define SENSOR_STATUS_LIGHT_MISSING       6553800
@@ -41,18 +42,16 @@
 				uint8_t					:7;			//
 			} *l4;
 
-			uint8_t      sht10Error = 0;
-			uint16_t     temperature = 0;
-			uint16_t     pressure = 0;
+			uint8_t      sht10Error;
+			uint16_t     temperature;
+			uint16_t     pressure;
 			uint32_t     luminosity;
-
 			uint8_t      nextAction;
 			uint8_t      tsl2561InitCount;
 			unsigned int tsl2561Data0;
 			unsigned int tsl2561Data1;
 			waitTimer    sensorTimer;											// delay timer for sensor
 			uint32_t     milliMeasureStart;										// save millis at start sensor reading
-
 
 			Sensirion    sht10;
 			BMP085       bmp180;
@@ -82,8 +81,8 @@
 			virtual void   set_toggle(void);
 
 			inline void    sht10Init(void);
-			inline void    sht10Measure(void);
-			inline void    bmp180Measure(void);
+			inline void    sht10Read(void);
+			inline void    bmp180Read(void);
 
 			inline void    tsl2561Init();
 			inline uint8_t tsl2561MeasureStart();

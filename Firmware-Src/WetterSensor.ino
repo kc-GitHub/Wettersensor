@@ -7,22 +7,10 @@
 #include "cmSensor.h"
 #include "register.h"																// configuration sheet
 
-#define SER_DBG
-
 //- arduino functions -----------------------------------------------------------------------------------------------------
 void setup() {
-	// - Hardware setup ---------------------------------------
-	// - everything off ---------------------------------------
-	wdt_disable();																	// clear WDRF to avoid endless resets after WDT reset
-	MCUSR &= ~(1<<WDRF);															// stop all WDT activities
-	WDTCSR |= (1<<WDCE) | (1<<WDE);
-	WDTCSR = 0x00;
-	EIMSK = 0;																		// disable external interrupts
-	ADCSRA = 0;																		// ADC off
+	wdt_disable();																	// disable Watchdog to avoid endless resets after WDT reset
 
-	// ToDo: we must activate twi only
-//	power_all_disable();															// and everything else
-	
 	// Say hello over UART
 	DBG_START(SER, F("Starting sketch for HB-UW-Sen-THPL (" __DATE__ " " __TIME__ ")\n"));
 	DBG(SER, F(LIB_VERSION_STRING), F("\n"));

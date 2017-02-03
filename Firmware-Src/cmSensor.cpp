@@ -33,11 +33,8 @@ CM_SENSOR::CM_SENSOR(const uint8_t peer_max) : CM_MASTER(peer_max) {
 	cm_status.message_type = STA_INFO::NOTHING;										// send the initial status info
 	cm_status.message_delay.set(0);
 
-	this->nextAction = SENSOR_ACTION_MEASURE_START_WAIT;
+	this->nextAction = SENSOR_ACTION_MEASURE_INIT;
 	this->tsl2561InitCount = 0;
-
-	this->sht10Init();																	// initialize the SHT10
-	this->tsl2561Init();
 }
 
 /**
@@ -57,61 +54,66 @@ void CM_SENSOR::info_config_change(uint8_t channel) {
 void CM_SENSOR::cm_poll(void) {
 	uint32_t measurementTime;
 
-	process_send_status_poll(&cm_status, lstC.cnl);								// check if there is some status to send, function call in cmMaster.cpp
+	process_send_status_poll(&cm_status, lstC.cnl);									// check if there is some status to send, function call in cmMaster.cpp
 
-	if (!this->sensorTimer.done()) return;										// step out while timer is still running
+	if (!this->sensorTimer.done()) return;											// step out while timer is still running
 
 	// Check if tsl2561 generated an PinChangeInterrupt
 	if (tsl2561_pciFlag) {
-		tsl2561_pciFlag = 0;
-		if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_WAIT) {
+		if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_TIMEOUT) {
 			this->nextAction = SENSOR_ACTION_MEASURE_LIGHT_READ;
 		}
 
-		// reset the interrupt line
-		this->tsl2561.clearInterrupt();
+		this->tsl2561.clearInterrupt();												// reset the interrupt line
+		tsl2561_pciFlag = 0;														// clear interrupt  flag
+		this->sensorTimer.set(0);													// set sensor timer to done
 	}
 
-	if (this->nextAction == SENSOR_ACTION_MEASURE_START_WAIT) {
+//	DBG(SER, F("cmSensor nextAction: "), nextAction, F("\n"));
+
+	if (this->nextAction == SENSOR_ACTION_MEASURE_INIT) {							// 0: initialize sensors if needed
+		this->sht10Init();															// initialize the SHT10
+		this->tsl2561Init();														// initialize the tsl2561
+		this->nextAction = SENSOR_ACTION_MEASURE_START_WAIT;						// initialize done we can activate measuring
+
+	} else if (this->nextAction == SENSOR_ACTION_MEASURE_START_WAIT) {				// 1: start measuring
 		this->milliMeasureStart = get_millis();
-		if (this->tsl2561MeasureStart()){
-			this->nextAction = SENSOR_ACTION_MEASURE_LIGHT_WAIT;
-		} else {
+
+		if (this->tsl2561MeasureStart()){											// check if sensor available
+			this->nextAction = SENSOR_ACTION_MEASURE_LIGHT_TIMEOUT;
+			this->sensorTimer.set(750);												// set maximum measure time for tsl2561
+
+		} else {																	// no tsl2561 found.
 			this->luminosity = SENSOR_STATUS_LIGHT_MISSING;
 			this->nextAction = SENSOR_ACTION_MEASURE_THP_READ;
 		}
 
-	} else if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_WAIT) {
-		measurementTime = get_millis() - this->milliMeasureStart;
+	} else if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_TIMEOUT) {			// 2: tsl2561 timeout
+		this->luminosity = SENSOR_STATUS_LIGHT_ERROR;
+		this->nextAction = SENSOR_ACTION_MEASURE_THP_READ;
 
-		// measure time to long, maybe there is a sensor failure. cancel light measuring
-		if (measurementTime > SENSOR_MAX_MEASURE_TIME) {
-			this->luminosity = SENSOR_STATUS_LIGHT_ERROR;
-			this->nextAction = SENSOR_ACTION_MEASURE_THP_READ;
-		}
-
-	} else if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_READ) {
+	} else if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_READ) {				// 3: Read tsl2561 value
 		this->tsl2561Read();
 
-	} else if (this->nextAction == SENSOR_ACTION_MEASURE_THP_READ) {
-		this->sht10Measure();
-		this->bmp180Measure();
+	} else if (this->nextAction == SENSOR_ACTION_MEASURE_THP_READ) {				// 4: Read SHT10 and BMP180
+		this->sht10Read();
+		this->bmp180Read();
 		this->nextAction = SENSOR_ACTION_TRANSMIT_WAIT;
 
-	} else if (this->nextAction == SENSOR_ACTION_TRANSMIT_WAIT) {
+	} else if (this->nextAction == SENSOR_ACTION_TRANSMIT_WAIT) {					// 5: wait time left for send slot
 		measurementTime = get_millis() - this->milliMeasureStart;
 		measurementTime = (measurementTime < SENSOR_MAX_MEASURE_TIME) ? measurementTime : 100;
 
-		this->sensorTimer.set(SENSOR_MAX_MEASURE_TIME - measurementTime);			// set a new measurement time
+		this->sensorTimer.set(SENSOR_MAX_MEASURE_TIME - measurementTime);			// set timer to next send slot
 		this->nextAction = SENSOR_ACTION_TRANSMIT;
 
-	} else if (this->nextAction == SENSOR_ACTION_TRANSMIT) {
+	} else if (this->nextAction == SENSOR_ACTION_TRANSMIT) {						// 6: send data
 		uint32_t nextSensorTime = (calcSendSlot() * 250);
 //		uint32_t nextSensorTime = 10000;
 
 		this->sensorTimer.set(nextSensorTime - SENSOR_MAX_MEASURE_TIME);			// set a new measurement time
 		this->transmittData();
-		this->nextAction = SENSOR_ACTION_MEASURE_START_WAIT;
+		this->nextAction = SENSOR_ACTION_MEASURE_START_WAIT;						// start state machine again
 	}
 }
 
@@ -120,18 +122,16 @@ void CM_SENSOR::cm_poll(void) {
  */
 
 void CM_SENSOR::CONFIG_STATUS_REQUEST(s_m01xx0e *buf) {
-	cm_status.message_type = STA_INFO::SND_ACTUATOR_STATUS;							// send next time a info status message
-	cm_status.message_delay.set(50);												// wait a short time to set status
-
-	DBG(SER, F("TH:CONFIG_STATUS_REQUEST\n"));
+//	cm_status.message_type = STA_INFO::SND_ACTUATOR_STATUS;							// send next time a info status message
+//	cm_status.message_delay.set(50);												// wait a short time to set status
+//	DBG(SER, F("TH:CONFIG_STATUS_REQUEST\n"));
 }
-
 
 /**
  *
  */
 void CM_SENSOR::set_toggle(void) {
-	DBG(SER, F("nextAction: "), this->nextAction, F("\n"));
+//	DBG(SER, F("nextAction: "), this->nextAction, F("\n"));
 
 	if (this->nextAction == SENSOR_ACTION_MEASURE_START_WAIT) {
 		this->sensorTimer.set(1);													// arm sensor timer, so we start measuring immediately
@@ -201,14 +201,14 @@ inline void CM_SENSOR::transmittData() {
  * Initialize the SHT10
  */
 inline void CM_SENSOR::sht10Init(void) {
-	this->sht10.config(A4, A5);															// configure the sensor
-	this->sht10.writeSR(LOW_RES);															// low resolution is enough
+	this->sht10.config(A4, A5);														// configure the sensor
+	this->sht10.writeSR(LOW_RES);													// low resolution is enough
 }
 
 /**
  * get the temperature from SHT10
  */
-inline void CM_SENSOR::sht10Measure(void) {
+inline void CM_SENSOR::sht10Read(void) {
 	uint16_t rawData;
 
 	TWCR = 0;																		// Disable I2C
@@ -227,7 +227,7 @@ inline void CM_SENSOR::sht10Measure(void) {
 /**
  * get the air pressure and temperature from BMP180
  */
-inline void CM_SENSOR::bmp180Measure(void) {
+inline void CM_SENSOR::bmp180Read(void) {
 	this->bmp180.begin();
 
 	// simple barometric formula
@@ -247,17 +247,18 @@ inline void CM_SENSOR::bmp180Measure(void) {
  * Initialize the TSL2561 Sensor
  */
 inline void CM_SENSOR::tsl2561Init() {
-	sei();
-
 	this->tsl2561.begin(TSL2561_ADDR_0);
 
 	// Check if tsl2561 available
 	if (this->tsl2561.setPowerUp()) {
+		this->tsl2561.clearInterrupt();
 		register_PCINT(&pin_C0);
 	}
 }
 
 inline uint8_t CM_SENSOR::tsl2561MeasureStart() {
+//	DBG(SER, F("Ttsl2561MeasureStart\n"));
+
 	// check if TSL2561 available
 	uint8_t initOk = this->tsl2561.setPowerUp();
 	if (initOk) {
@@ -270,7 +271,6 @@ inline uint8_t CM_SENSOR::tsl2561MeasureStart() {
 
 		if (this->tsl2561InitCount == 0) {
 			// first set to low sensitive
-//			this->tsl2561.clearInterrupt();
 			this->tsl2561Data0 = 0;
 			this->tsl2561Data1 = 0;
 
