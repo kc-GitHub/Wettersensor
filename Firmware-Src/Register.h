@@ -114,8 +114,7 @@
 	 * - Scenario (0 = no config button, 1 = config at press short, 2 = config at press long)
 	 * - config button pin
 	 */
-//	CBN *cbn = new CBN(1, &pin_B0);
-	CBN *cbn = new CBN(2, &pin_B0);
+	CBN *cbn = new CBN(1, &pin_B0);
 
 	// Setup status led (red, green)
 	LED *led = new LED(&pin_D4, &pin_D4);

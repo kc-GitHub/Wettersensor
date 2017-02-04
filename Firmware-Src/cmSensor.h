@@ -18,15 +18,15 @@
 	const uint8_t cm_thsensor_PeerReg[] PROGMEM = { 0x01,0x02, };
 	const uint8_t cm_thsensor_PeerDef[] PROGMEM = { 0x00,0x00, };
 
-	#define SENSOR_ACTION_MEASURE_INIT          0
-	#define SENSOR_ACTION_MEASURE_START_WAIT    1
-	#define SENSOR_ACTION_MEASURE_LIGHT_TIMEOUT 2
-	#define SENSOR_ACTION_MEASURE_LIGHT_READ    3
-	#define SENSOR_ACTION_MEASURE_THP_READ      4
-	#define SENSOR_ACTION_TRANSMIT_WAIT         5
-	#define SENSOR_ACTION_TRANSMIT              6
+	#define SENSOR_ACTION_MEASURE_INIT        0
+	#define SENSOR_ACTION_MEASURE_START_WAIT  1
+	#define SENSOR_ACTION_MEASURE_LIGHT_WAIT  2
+	#define SENSOR_ACTION_MEASURE_LIGHT_READ  3
+	#define SENSOR_ACTION_MEASURE_THP_READ    4
+	#define SENSOR_ACTION_TRANSMIT_WAIT       5
+	#define SENSOR_ACTION_TRANSMIT            6
 
-	#define SENSOR_MAX_MEASURE_TIME           1500								// maximum expected time which sensors needed for collecting data
+	#define SENSOR_MAX_MEASURE_TIME           1000								// maximum expected time which sensors needed for collecting data
 	#define SENSOR_STATUS_LIGHT_MISSING       6553800
 	#define SENSOR_STATUS_LIGHT_ERROR         6553700
 
@@ -87,7 +87,7 @@
 
 			inline void    tsl2561Init();
 			inline uint8_t tsl2561MeasureStart();
-			inline void    tsl2561Read();
+			inline uint8_t tsl2561Read();
 
 			inline void    transmittData();
 	};

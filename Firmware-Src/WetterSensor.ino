@@ -34,6 +34,14 @@ void setup() {
 		#endif
 	#endif
 
+	// Debug function
+	if ( !(PINB & (1<<PINB0)) ) {													// check if config btn pressed at boot
+		cbn->button_check.scenario = 2;												// set config button in action mode
+		PORTD |= (1<<PD4);															// Status-LED on
+		_delay_ms(3000);
+		PORTD &= ~(1<<PD4);															// Status-LED off
+	}
+
 	pci_ptr = &pci_callback;
 	sei();																			// enable interrupts
 
@@ -140,8 +148,7 @@ uint16_t getAdcValue(uint8_t admux) {
  * <flag> to indentify a falling or raising edge. 0 = falling, value above 0 = raising
  */
 void pci_callback(uint8_t vec, uint8_t pin, uint8_t flag) {
-	// Check PC-INT for PortC, Pin0 Falling Edge (TSL2561 conversion complete)
-	if (vec == 1 && flag == 0) {
+	if (vec == 1 && flag == 0) {												// Check PC-INT for PortC, Pin0 Falling Edge (TSL2561 conversion complete)
 		tsl2561_pciFlag = 1;
 	}
 

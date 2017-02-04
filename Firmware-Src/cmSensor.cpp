@@ -35,7 +35,6 @@ CM_SENSOR::CM_SENSOR(const uint8_t peer_max) : CM_MASTER(peer_max) {
 
 	this->nextAction = SENSOR_ACTION_MEASURE_INIT;
 	this->tsl2561InitCount = 0;
-	this->timerRemain = 0;
 }
 
 /**
@@ -57,20 +56,20 @@ void CM_SENSOR::cm_poll(void) {
 
 	process_send_status_poll(&cm_status, lstC.cnl);									// check if there is some status to send, function call in cmMaster.cpp
 
-	if (!this->sensorTimer.done()) return;											// step out while timer is still running
-
 	// Check if tsl2561 generated an PinChangeInterrupt
 	if (tsl2561_pciFlag) {
-		if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_TIMEOUT) {
+		if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_WAIT) {
 			this->nextAction = SENSOR_ACTION_MEASURE_LIGHT_READ;
+			this->sensorTimer.set(0);													// set sensor timer to done
 		}
 
 		this->tsl2561.clearInterrupt();												// reset the interrupt line
 		tsl2561_pciFlag = 0;														// clear interrupt  flag
-		this->sensorTimer.set(0);													// set sensor timer to done
 	}
 
-//	DBG(SER, F("cmSensor nextAction: "), nextAction, F("\n"));
+	if (!this->sensorTimer.done()) return;											// step out while timer is still running
+
+//	DBG(SER, F("nA: "), nextAction, _TIME, F(", "), (get_millis() - this->tmpMilli), F("\n"));
 
 	if (this->nextAction == SENSOR_ACTION_MEASURE_INIT) {							// 0: initialize sensors if needed
 		this->sht10Init();															// initialize the SHT10
@@ -81,20 +80,24 @@ void CM_SENSOR::cm_poll(void) {
 		this->milliMeasureStart = get_millis();
 
 		if (this->tsl2561MeasureStart()){											// check if sensor available
-			this->nextAction = SENSOR_ACTION_MEASURE_LIGHT_TIMEOUT;
-			this->sensorTimer.set(850);												// set maximum measure time for tsl2561
+			this->nextAction = SENSOR_ACTION_MEASURE_LIGHT_WAIT;
+			this->sensorTimer.set(850);												// set timeout for tsl2561 measurement
 
 		} else {																	// no tsl2561 found.
 			this->luminosity = SENSOR_STATUS_LIGHT_MISSING;
 			this->nextAction = SENSOR_ACTION_MEASURE_THP_READ;
 		}
 
-	} else if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_TIMEOUT) {			// 2: tsl2561 timeout
+	} else if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_WAIT) {				// 2: tsl2561 timeout
 		this->luminosity = SENSOR_STATUS_LIGHT_ERROR;
 		this->nextAction = SENSOR_ACTION_MEASURE_THP_READ;
 
 	} else if (this->nextAction == SENSOR_ACTION_MEASURE_LIGHT_READ) {				// 3: Read tsl2561 value
-		this->tsl2561Read();
+		if (!this->tsl2561Read()) {
+			this->nextAction = SENSOR_ACTION_MEASURE_START_WAIT;					// we measure again
+		} else {
+			this->nextAction = SENSOR_ACTION_MEASURE_THP_READ;
+		}
 
 	} else if (this->nextAction == SENSOR_ACTION_MEASURE_THP_READ) {				// 4: Read SHT10 and BMP180
 		this->sht10Read();
@@ -108,23 +111,9 @@ void CM_SENSOR::cm_poll(void) {
 		this->nextAction = SENSOR_ACTION_TRANSMIT;
 
 	} else if (this->nextAction == SENSOR_ACTION_TRANSMIT) {						// 6: send data
-		uint32_t nextSensorTime;
-
-		if (this->timerRemain == 0) {
-			nextSensorTime = calcSendSlot() - SENSOR_MAX_MEASURE_TIME;
-
-		} else {																	// transmission initiates manual
-			measurementTime = get_millis() - this->milliMeasureStart;				// calculate time correction
-			nextSensorTime = this->timerRemain - measurementTime;					// correction to next send time slot
-			this->timerRemain = 0;
-		}
-
-// set manual send time (for debugging)
-//		uint32_t nextSensorTime = 10000;
-
-		this->sensorTimer.set(nextSensorTime);			// set a new measurement time
-		this->transmittData();
+		this->sensorTimer.set(calcSendSlot() - SENSOR_MAX_MEASURE_TIME);			// set a new measurement time
 		this->nextAction = SENSOR_ACTION_MEASURE_START_WAIT;						// start state machine again
+		this->transmittData();
 	}
 }
 
@@ -142,10 +131,7 @@ void CM_SENSOR::CONFIG_STATUS_REQUEST(s_m01xx0e *buf) {
  *
  */
 void CM_SENSOR::set_toggle(void) {
-//	DBG(SER, F("nextAction: "), this->nextAction, F("\n"));
-
-	if (this->nextAction == SENSOR_ACTION_MEASURE_START_WAIT && this->sensorTimer.remain() > 3000) {
-		this->timerRemain = this->sensorTimer.remain();								// remember time to next calculated send slot
+	if (this->nextAction == SENSOR_ACTION_MEASURE_START_WAIT && this->sensorTimer.remain() > 2000) {
 		this->sensorTimer.set(0);													// arm sensor timer, so we start measuring immediately
 	}
 }
@@ -170,7 +156,7 @@ inline uint32_t CM_SENSOR::calcSendSlot(void) {
 
 	uint32_t result = ((( *(uint32_t*)&hmId << 8) | (snd_msg.mBody.MSG_CNT)) * 1103515245 + 12345) >> 16;
 	result = ((result & 0xFF) + 480) * 250;
-	result+= 500;
+	result+= 1000;
 
 	return result;
 }
@@ -301,21 +287,23 @@ inline uint8_t CM_SENSOR::tsl2561MeasureStart() {
 	return initOk;
 }
 
-inline void CM_SENSOR::tsl2561Read() {
+inline uint8_t CM_SENSOR::tsl2561Read() {
+	uint8_t result;
 	// read light data
 	this->tsl2561.getData(this->tsl2561Data0, this->tsl2561Data1);
 
 	if (this->tsl2561InitCount == 0 && this->tsl2561Data0 < 2000 && this->tsl2561Data1 < 2000) {
-		// we measure again
-		this->nextAction = SENSOR_ACTION_MEASURE_START_WAIT;
 		this->tsl2561InitCount++;
+		result = 0;
 
 	} else {
 		double lux = 0;
 		boolean luxValid = this->tsl2561.getLux(this->tsl2561Data0, this->tsl2561Data1, lux);
 		this->luminosity = ((luxValid) ? lux : 65535) * 100;
-		this->nextAction = SENSOR_ACTION_MEASURE_THP_READ;
+		result = 1;
 	}
 
 	this->tsl2561.setPowerDown();
+
+	return result;
 }
